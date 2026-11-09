@@ -1,13 +1,13 @@
 docs/layers.md — үлгі
 # Қабат картасы (4-сабақ)
-| Қабат      | Мұғалім жаңа тест құрады                                                 | Оқушы тестті тапсырады                                                                 |
-|------------|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| Router     | POST /api/tests — teacher рөлі                                           | POST /api/tests/{test_id}/attempts — student рөлі                                      |
-| Schema     | TestCreate кірісі → TestRead жауабы                                      | AttemptCreate кірісі → AttemptResult жауабы                                            |
-| Service    | Сұрақтарды тексереді және тестті Repository арқылы жоба ретінде сақтайды | Оқушының жауаптарын тексеріп, балл есептейді                                           |
-| Repository | TestRepository.create тест пен сұрақтарды сақтайды                       | TestRepository.get_published тестті табады, AttemptRepository.create нәтижені сақтайды |
-| Model      | tests, questions, answer_options кестелері                               | test_attempts және attempt_answers кестелері                                           |
-| Қате→HTTP  | Тестте сұрақ болмаса → 422 Unprocessable Content                         | Жарияланған тест табылмаса → 404 Not Found                                             |
+| Қабат      | Мұғалім жаңа тест құрады               | Оқушы тестті тапсырады                                 |
+|------------|----------------------------------------|--------------------------------------------------------|
+| Router     | POST /api/tests (teacher)              | POST /api/tests/{test_id}/attempts (student)           |
+| Schema     | TestCreate → TestRead                  | AttemptCreate → AttemptResult                          |
+| Service    | Сұрақтарды тексереді, сақтауды сұрайды | Жауаптарды тексереді, балл есептейді                   |
+| Repository | TestRepository.create                  | TestRepository.get_published; AttemptRepository.create |
+| Model      | tests, questions, answer_options       | test_attempts, attempt_answers                         |
+| Қате→HTTP  | Сұрақ жоқ → 422                        | Тест табылмады → 404                                   |
 ## Біздің ереже
 - Router-де SQL жоқ, service-те HTTPException жоқ
 - Құпиялар тек .env-те
