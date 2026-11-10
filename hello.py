@@ -1,25 +1,3 @@
-(
-set -euo pipefail
-cd "$(git rev-parse --show-toplevel)"
-root="$PWD"
-message="4-сабақ: қабат картасы, backend қаңқасы"
-
-if git ls-files --error-unmatch -- .env >/dev/null 2>&1; then
-    echo 'Остановлено: .env уже отслеживается Git.'
-    exit 1
-fi
-if git show-ref --verify --quiet refs/tags/lesson-04; then
-    echo 'Остановлено: тег lesson-04 уже существует.'
-    exit 1
-fi
-
-mkdir -p docs backend/app/{core,routers,schemas,services,repositories,models}
-touch backend/app/__init__.py
-touch backend/app/{core,routers,schemas,services,repositories,models}/__init__.py
-
-cat > docs/layers.md <<'EOF'
-docs/layers.md — үлгі
-
 # Қабат картасы (4-сабақ)
 
 ```mermaid
@@ -90,21 +68,21 @@ add_line() {
     fi
 }
 
+add_dependency() {
+    local file="$1" name="$2" requirement="$3"
+    touch "$file"
+    if ! grep -Eiq "^${name}([^[:alnum:]_-]|$)" "$file"; then
+        add_line "$file" "$requirement"
+    fi
+}
+
 add_line .gitignore '.env'
 add_line .gitignore '.venv/'
-if ! grep -Eiq '^fastapi([[:space:]<>=!~;\[]|$)' backend/requirements.txt 2>/dev/null; then
-    add_line backend/requirements.txt 'fastapi'
-fi
-if ! grep -Eiq '^pydantic[-_]settings([[:space:]<>=!~;\[]|$)' backend/requirements.txt; then
-    add_line backend/requirements.txt 'pydantic-settings>=2,<3'
-fi
+add_dependency backend/requirements.txt fastapi fastapi
+add_dependency backend/requirements.txt 'pydantic[-_]settings' 'pydantic-settings>=2,<3'
 add_line backend/requirements-dev.txt '-r requirements.txt'
-if ! grep -Eiq '^ruff([[:space:]<>=!~;\[]|$)' backend/requirements-dev.txt; then
-    add_line backend/requirements-dev.txt 'ruff'
-fi
-if ! grep -Eiq '^pytest([[:space:]<>=!~;\[]|$)' backend/requirements-dev.txt; then
-    add_line backend/requirements-dev.txt 'pytest'
-fi
+add_dependency backend/requirements-dev.txt ruff ruff
+add_dependency backend/requirements-dev.txt pytest pytest
 
 if [[ ! -e backend/pyproject.toml ]]; then
     cat > backend/pyproject.toml <<'EOF'
@@ -127,47 +105,51 @@ cat > docs/prompt-log.md <<'EOF'
 
 | Қадам | Сұраныс | Нәтиже |
 |-------|---------|--------|
-| П1 | Қабат картасын тексеру және Mermaid сызбасын қосу. | Картада екі әрекет, бес қабат және HTTP қателері көрсетілді. |
-| П2 | Backend қаңқасын және Ruff баптауын дайындау. | Алты пакет, баптау және тәуелділік файлдары дайындалды. |
-| П3 | Конфигурациядағы айнымалыларды түсіндіру. | Айнымалылардың қызметі, әдепкі мәндері және орталар арасындағы айырмашылық қарастырылды. |
+| П1 | Қабат картасын тексеру және Mermaid сызбасын қосу. | Екі әрекет, бес қабат және әр әрекетке HTTP қатесі көрсетілді. |
+| П2 | Backend қаңқасын және Ruff баптауын дайындау. | Алты пакет, конфигурация және тәуелділік файлдары дайындалды. |
+| П3 | Конфигурация айнымалыларының қызметін түсіндіру. | Айнымалылардың мақсаты, әдепкі мәндері және үш ортаға арналған баптаулар сипатталды. |
+
+## П3. Баптаулар
+
+1. `APP_NAME` — жоба атауы. `ENVIRONMENT` — іске қосу ортасы. `DATABASE_URL` — дерекқорға қосылу жолы. `CORS_ORIGINS` — рұқсат етілген frontend мекенжайларының JSON тізімі.
+2. `.env.example` ішіндегі `replace-me` — үлгі мәні. Нақты құпия мәндер жергілікті `.env` файлында сақталады.
+3. `DATABASE_URL` орта айнымалыларында да, `.env` файлында да болмаса, конфигурация жүктелгенде валидация қатесі шығады. Қалған үш баптаудың әдепкі мәні бар.
+4. `local`, `test` және `server` орталарында дерекқорға қосылу жолы мен рұқсат етілген frontend мекенжайлары ортаға сай беріледі.
 EOF
 
-echo 'Проверь локальный .env в редакторе. Значение replace-me замени своими настройками.'
-echo 'После сохранения нажми Enter.'
+echo 'Проверь значения в локальном .env. После сохранения нажми Enter.'
 IFS= read -r </dev/tty
 
-lesson_python=python
+python_cmd=python
+if ! command -v python >/dev/null 2>&1; then
+    python_cmd=python3
+fi
+
 if [[ -z "${VIRTUAL_ENV:-}" ]]; then
     if [[ ! -d .venv ]]; then
-        python -m venv .venv
+        "$python_cmd" -m venv .venv
     fi
     if [[ -f .venv/Scripts/python.exe ]]; then
-        lesson_python="$root/.venv/Scripts/python.exe"
+        python_cmd="$root/.venv/Scripts/python.exe"
     else
-        lesson_python="$root/.venv/bin/python"
+        python_cmd="$root/.venv/bin/python"
     fi
 fi
 
 (
     cd backend
-    "$lesson_python" -m pip install -r requirements-dev.txt
-    "$lesson_python" -c "from app.core.config import settings; print('config ok')"
-    "$lesson_python" -m ruff check .
+    "$python_cmd" -m pip install -r requirements-dev.txt
+    "$python_cmd" -c "from app.core.config import settings; print('config ok')"
+    "$python_cmd" -m ruff check .
 )
 
-echo 'Заполни журнал прямо здесь. После каждого ответа нажимай Enter.'
-ask() {
-    local answer=''
-    while [[ -z "${answer//[[:space:]]/}" ]]; do
-        printf '%s\n> ' "$1" >&2
-        IFS= read -r answer </dev/tty || return 1
-    done
-    printf '%s' "$answer"
-}
-
-p1=$(ask 'П1. Какую правку карты ты приняла или отклонила и почему?')
-p2=$(ask 'П2. Какое решение по каркасу ты приняла или отклонила и почему?')
-p3=$(ask 'П3. Своими словами: для чего нужны APP_NAME, ENVIRONMENT, DATABASE_URL и CORS_ORIGINS, где хранятся секреты, что бывает без значения и что меняется между local, test и server?')
+echo 'Для prompt log ответь своими словами. После каждой строки нажимай Enter.'
+printf 'П1. Что ты приняла или отклонила в карте и почему? '
+IFS= read -r p1 </dev/tty
+printf 'П2. Что ты приняла или отклонила в каркасе и почему? '
+IFS= read -r p2 </dev/tty
+printf 'П3. Как ты объяснишь настройки своими словами? '
+IFS= read -r p3 </dev/tty
 
 printf '\n## Өз шешімім\n\n- П1 — %s\n- П2 — %s\n- П3 — %s\n' \
     "$p1" "$p2" "$p3" >> docs/prompt-log.md
@@ -180,14 +162,10 @@ files=(
 )
 
 git status --short -- "${files[@]}"
-printf 'Чтобы сделать коммит и отправить его на GitHub, введи yes: '
+printf 'Для коммита и отправки на GitHub введи yes и нажми Enter. '
 IFS= read -r answer </dev/tty
-if [[ "$answer" != yes ]]; then
-    echo 'Файлы готовы. Коммит ещё не сделан.'
-    exit 0
-fi
+[[ "$answer" == yes ]] || exit 0
 
-branch=lesson-04-work
 if [[ "$(git branch --show-current)" != "$branch" ]]; then
     git switch -c "$branch"
 fi
@@ -202,7 +180,8 @@ if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
     gh pr create --head "$branch" --title "$message" \
         --body 'Қабат картасы, Mermaid сызбасы, backend қаңқасы және prompt log.'
 else
-    echo 'Ветка и тег отправлены. Открой ссылку из git push и создай PR из lesson-04-work.'
+    echo 'Ветка и тег отправлены. Для PR открой ссылку из вывода git push.'
 fi
-)       
+)
+       
   
