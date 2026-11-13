@@ -6,40 +6,40 @@
 
 MoSCoW: M — обязательно; S — желательно; C — можно добавить; W — не входит в текущую версию.
 
-```text
-| ID    | Story                                        | M/S/C/W | Условия приёмки                                  |
+<div><samp>
+|&nbsp;ID&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Story&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;M/S/C/W&nbsp;|&nbsp;Условия&nbsp;приёмки&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|-------|----------------------------------------------|---------|--------------------------------------------------|<br>
+|&nbsp;US-1&nbsp;&nbsp;|&nbsp;Как&nbsp;преподаватель,&nbsp;я&nbsp;хочу&nbsp;подготовить&nbsp;и&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Можно&nbsp;сохранить&nbsp;название&nbsp;и&nbsp;вопросы;&nbsp;у&nbsp;каждого&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;опубликовать&nbsp;тест&nbsp;с&nbsp;вариантами&nbsp;ответов,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;вопроса&nbsp;есть&nbsp;варианты,&nbsp;один&nbsp;правильный&nbsp;ответ&nbsp;и&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;чтобы&nbsp;проверить&nbsp;знания&nbsp;студентов.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;пояснение&nbsp;с&nbsp;темой&nbsp;для&nbsp;повторения;&nbsp;неполный&nbsp;тест&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;не&nbsp;публикуется;&nbsp;опубликованный&nbsp;тест&nbsp;доступен&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;студенту&nbsp;по&nbsp;ссылке.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|-------|----------------------------------------------|---------|--------------------------------------------------|<br>
+|&nbsp;US-2&nbsp;&nbsp;|&nbsp;Как&nbsp;студент,&nbsp;я&nbsp;хочу&nbsp;пройти&nbsp;тест&nbsp;и&nbsp;отправить&nbsp;&nbsp;|&nbsp;M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Студент&nbsp;указывает&nbsp;имя&nbsp;и&nbsp;группу,&nbsp;выбирает&nbsp;ответы&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;ответы,&nbsp;чтобы&nbsp;преподаватель&nbsp;получил&nbsp;мою&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;и&nbsp;отправляет&nbsp;работу;&nbsp;видит&nbsp;подтверждение;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;работу.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;преподавателю&nbsp;доступны&nbsp;указанные&nbsp;имя,&nbsp;группа&nbsp;и&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;ответы.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|-------|----------------------------------------------|---------|--------------------------------------------------|<br>
+|&nbsp;US-3&nbsp;&nbsp;|&nbsp;Как&nbsp;преподаватель,&nbsp;я&nbsp;хочу&nbsp;получить&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Ответы&nbsp;сравниваются&nbsp;с&nbsp;заданными&nbsp;правильными&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;автоматически&nbsp;рассчитанные&nbsp;результаты,&nbsp;чтобы&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;вариантами;&nbsp;правильный&nbsp;ответ&nbsp;даёт&nbsp;один&nbsp;балл,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;не&nbsp;проверять&nbsp;каждый&nbsp;ответ&nbsp;вручную.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;неверный&nbsp;или&nbsp;пропущенный&nbsp;—&nbsp;ноль;&nbsp;преподаватель&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;видит&nbsp;список&nbsp;работ&nbsp;и&nbsp;итоговый&nbsp;балл&nbsp;каждой.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|-------|----------------------------------------------|---------|--------------------------------------------------|<br>
+|&nbsp;US-4&nbsp;&nbsp;|&nbsp;Как&nbsp;студент,&nbsp;я&nbsp;хочу&nbsp;увидеть&nbsp;результат&nbsp;и&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;После&nbsp;завершения&nbsp;тестирования&nbsp;преподаватель&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;разбор&nbsp;своих&nbsp;ответов,&nbsp;чтобы&nbsp;понять&nbsp;ошибки&nbsp;и&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;открывает&nbsp;результаты;&nbsp;студент&nbsp;видит&nbsp;свой&nbsp;балл,&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;темы&nbsp;для&nbsp;повторения.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;свои&nbsp;ответы,&nbsp;правильные&nbsp;варианты&nbsp;и&nbsp;пояснения&nbsp;к&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;ошибкам;&nbsp;чужие&nbsp;работы&nbsp;недоступны.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|-------|----------------------------------------------|---------|--------------------------------------------------|<br>
+|&nbsp;US-5&nbsp;&nbsp;|&nbsp;Как&nbsp;преподаватель,&nbsp;я&nbsp;хочу&nbsp;создать&nbsp;копию&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;В&nbsp;копию&nbsp;перенесены&nbsp;вопросы,&nbsp;варианты,&nbsp;правильные&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;прежнего&nbsp;теста,&nbsp;чтобы&nbsp;повторно&nbsp;использовать&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;ответы&nbsp;и&nbsp;пояснения;&nbsp;изменение&nbsp;копии&nbsp;не&nbsp;меняет&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;вопросы&nbsp;для&nbsp;новой&nbsp;группы.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;оригинал;&nbsp;прежние&nbsp;результаты&nbsp;не&nbsp;копируются.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|-------|----------------------------------------------|---------|--------------------------------------------------|<br>
+|&nbsp;US-6&nbsp;&nbsp;|&nbsp;Как&nbsp;студент,&nbsp;я&nbsp;хочу&nbsp;видеть&nbsp;историю&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;История&nbsp;показывает&nbsp;название,&nbsp;дату&nbsp;отправки&nbsp;и&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;собственных&nbsp;тестов,&nbsp;чтобы&nbsp;отслеживать&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;открытый&nbsp;преподавателем&nbsp;балл;&nbsp;выбор&nbsp;записи&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;результаты&nbsp;обучения.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;открывает&nbsp;собственную&nbsp;работу;&nbsp;чужие&nbsp;работы&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;недоступны.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
 |-------|----------------------------------------------|---------|--------------------------------------------------|
-| US-1  | Как преподаватель, я хочу подготовить и      | M       | Можно сохранить название и вопросы; у каждого    |
-|       | опубликовать тест с вариантами ответов,      |         | вопроса есть варианты, один правильный ответ и   |
-|       | чтобы проверить знания студентов.            |         | пояснение с темой для повторения; неполный тест  |
-|       |                                              |         | не публикуется; опубликованный тест доступен     |
-|       |                                              |         | студенту по ссылке.                              |
-|-------|----------------------------------------------|---------|--------------------------------------------------|
-| US-2  | Как студент, я хочу пройти тест и отправить  | M       | Студент указывает имя и группу, выбирает ответы  |
-|       | ответы, чтобы преподаватель получил мою      |         | и отправляет работу; видит подтверждение;        |
-|       | работу.                                      |         | преподавателю доступны указанные имя, группа и   |
-|       |                                              |         | ответы.                                          |
-|-------|----------------------------------------------|---------|--------------------------------------------------|
-| US-3  | Как преподаватель, я хочу получить           | M       | Ответы сравниваются с заданными правильными      |
-|       | автоматически рассчитанные результаты, чтобы |         | вариантами; правильный ответ даёт один балл,     |
-|       | не проверять каждый ответ вручную.           |         | неверный или пропущенный — ноль; преподаватель   |
-|       |                                              |         | видит список работ и итоговый балл каждой.       |
-|-------|----------------------------------------------|---------|--------------------------------------------------|
-| US-4  | Как студент, я хочу увидеть результат и      | M       | После завершения тестирования преподаватель      |
-|       | разбор своих ответов, чтобы понять ошибки и  |         | открывает результаты; студент видит свой балл,   |
-|       | темы для повторения.                         |         | свои ответы, правильные варианты и пояснения к   |
-|       |                                              |         | ошибкам; чужие работы недоступны.                |
-|-------|----------------------------------------------|---------|--------------------------------------------------|
-| US-5  | Как преподаватель, я хочу создать копию      | S       | В копию перенесены вопросы, варианты, правильные |
-|       | прежнего теста, чтобы повторно использовать  |         | ответы и пояснения; изменение копии не меняет    |
-|       | вопросы для новой группы.                    |         | оригинал; прежние результаты не копируются.      |
-|-------|----------------------------------------------|---------|--------------------------------------------------|
-| US-6  | Как студент, я хочу видеть историю           | C       | История показывает название, дату отправки и     |
-|       | собственных тестов, чтобы отслеживать        |         | открытый преподавателем балл; выбор записи       |
-|       | результаты обучения.                         |         | открывает собственную работу; чужие работы       |
-|       |                                              |         | недоступны.                                      |
-|-------|----------------------------------------------|---------|--------------------------------------------------|
-```
+</samp></div>
 
 ## Граница MVP
 
