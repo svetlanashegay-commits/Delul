@@ -1,28 +1,28 @@
-# Қабат картасы (4-сабақ)
+# Карта слоёв (урок 4)
 
 ```mermaid
 flowchart LR
-    Browser["Браузер"] --> Router["Router"]
-    Router --> Logic["Schema / Service"]
-    Logic --> Repository["Repository"]
-    Repository --> Model["Model (PostgreSQL)"]
-    Core["Core (config, database)"] -.-> Router
+    Browser["Браузер"] --> Router["Маршрутизатор"]
+    Router --> Logic["Схема / Сервис"]
+    Logic --> Repository["Репозиторий"]
+    Repository --> Model["Модель (PostgreSQL)"]
+    Core["Ядро (настройки, база данных)"] -.-> Router
     Core -.-> Repository
 ```
 
-| Қабат      | Мұғалім жаңа тест құрады                           | Оқушы тестті тапсырады                                                |
+| Слой      | Преподаватель создаёт новый тест                           | Студент проходит тест                                                |
 |------------|----------------------------------------------------|-----------------------------------------------------------------------|
-| Router     | POST /api/tests · teacher рөлі                     | POST /api/tests/{test_id}/attempts · student рөлі                      |
-| Schema     | TestCreate кірісі → TestRead жауабы                | AttemptCreate кірісі → AttemptResult жауабы                           |
-| Service    | Мұғалімді тест иесі етеді, жоба күйін белгілейді    | Жауаптарды тексереді және ұпай есептейді                               |
-| Repository | TestRepository.create тест пен сұрақтарды сақтайды | TestRepository.get_published оқиды, AttemptRepository.create сақтайды |
-| Model      | tests, questions, answer_options кестелері         | test_attempts және attempt_answers кестелері                          |
-| Қате→HTTP  | Сұрақтар тізімі бос → 422                          | Жарияланған тест табылмады → 404                                       |
+| Router     | POST /api/tests · роль teacher                     | POST /api/tests/{test_id}/attempts · роль student                      |
+| Schema     | Вход TestCreate → ответ TestRead                | Вход AttemptCreate → ответ AttemptResult                           |
+| Service    | Назначает преподавателя владельцем теста, задаёт статус черновика    | Проверяет ответы и рассчитывает баллы                               |
+| Repository | TestRepository.create сохраняет тест и вопросы | TestRepository.get_published читает, AttemptRepository.create сохраняет |
+| Model      | Таблицы tests, questions, answer_options         | Таблицы test_attempts и attempt_answers                          |
+| Ошибка→HTTP  | Список вопросов пуст → 422                          | Опубликованный тест не найден → 404                                       |
 
-## Біздің ереже
+## Наши правила
 
-- Router-де SQL жоқ, service-те HTTPException жоқ
-- Құпиялар тек .env-те
+- В маршрутизаторе нет SQL, в сервисе нет HTTPException
+- Секреты хранятся только в .env
 EOF
 
 if [[ ! -e backend/app/core/config.py ]]; then
@@ -101,20 +101,20 @@ if [[ ! -e .env ]]; then
 fi
 
 cat > docs/prompt-log.md <<'EOF'
-# Prompt log — 4-сабақ
+# Журнал запросов — урок 4
 
-| Қадам | Сұраныс | Нәтиже |
+| Шаг | Запрос | Результат |
 |-------|---------|--------|
-| П1 | Қабат картасын тексеру және Mermaid сызбасын қосу. | Екі әрекет, бес қабат және әр әрекетке HTTP қатесі көрсетілді. |
-| П2 | Backend қаңқасын және Ruff баптауын дайындау. | Алты пакет, конфигурация және тәуелділік файлдары дайындалды. |
-| П3 | Конфигурация айнымалыларының қызметін түсіндіру. | Айнымалылардың мақсаты, әдепкі мәндері және үш ортаға арналған баптаулар сипатталды. |
+| П1 | Проверить карту слоёв и добавить схему Mermaid. | Показаны два действия, пять слоёв и ошибка HTTP для каждого действия. |
+| П2 | Подготовить каркас серверной части и настройки Ruff. | Подготовлены шесть пакетов, конфигурация и файлы зависимостей. |
+| П3 | Объяснить назначение переменных конфигурации. | Описаны назначение переменных, значения по умолчанию и настройки для трёх сред. |
 
-## П3. Баптаулар
+## П3. Настройки
 
-1. `APP_NAME` — жоба атауы. `ENVIRONMENT` — іске қосу ортасы. `DATABASE_URL` — дерекқорға қосылу жолы. `CORS_ORIGINS` — рұқсат етілген frontend мекенжайларының JSON тізімі.
-2. `.env.example` ішіндегі `replace-me` — үлгі мәні. Нақты құпия мәндер жергілікті `.env` файлында сақталады.
-3. `DATABASE_URL` орта айнымалыларында да, `.env` файлында да болмаса, конфигурация жүктелгенде валидация қатесі шығады. Қалған үш баптаудың әдепкі мәні бар.
-4. `local`, `test` және `server` орталарында дерекқорға қосылу жолы мен рұқсат етілген frontend мекенжайлары ортаға сай беріледі.
+1. `APP_NAME` — название проекта. `ENVIRONMENT` — среда запуска. `DATABASE_URL` — строка подключения к базе данных. `CORS_ORIGINS` — список разрешённых адресов клиентской части в формате JSON.
+2. `replace-me` в `.env.example` — пример значения. Настоящие секретные значения хранятся в локальном файле `.env`.
+3. Если `DATABASE_URL` отсутствует и в переменных окружения, и в файле `.env`, при загрузке конфигурации возникает ошибка валидации. Остальные три настройки имеют значения по умолчанию.
+4. Для сред `local`, `test` и `server` строка подключения к базе данных и разрешённые адреса клиентской части задаются в соответствии со средой.
 EOF
 
 echo 'Проверь значения в локальном .env. После сохранения нажми Enter.'
@@ -139,11 +139,11 @@ fi
 (
     cd backend
     "$python_cmd" -m pip install -r requirements-dev.txt
-    "$python_cmd" -c "from app.core.config import settings; print('config ok')"
+    "$python_cmd" -c "from app.core.config import settings; print('конфигурация загружена')"
     "$python_cmd" -m ruff check .
 )
 
-echo 'Для prompt log ответь своими словами. После каждой строки нажимай Enter.'
+echo 'Для журнала запросов ответь своими словами. После каждой строки нажимай Enter.'
 printf 'П1. Что ты приняла или отклонила в карте и почему? '
 IFS= read -r p1 </dev/tty
 printf 'П2. Что ты приняла или отклонила в каркасе и почему? '
@@ -151,7 +151,7 @@ IFS= read -r p2 </dev/tty
 printf 'П3. Как ты объяснишь настройки своими словами? '
 IFS= read -r p3 </dev/tty
 
-printf '\n## Өз шешімім\n\n- П1 — %s\n- П2 — %s\n- П3 — %s\n' \
+printf '\n## Моё решение\n\n- П1 — %s\n- П2 — %s\n- П3 — %s\n' \
     "$p1" "$p2" "$p3" >> docs/prompt-log.md
 
 files=(
@@ -178,7 +178,7 @@ git push --atomic -u origin "$branch" refs/tags/lesson-04
 
 if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
     gh pr create --head "$branch" --title "$message" \
-        --body 'Қабат картасы, Mermaid сызбасы, backend қаңқасы және prompt log.'
+        --body 'Карта слоёв, схема Mermaid, каркас серверной части и журнал запросов.'
 else
     echo 'Ветка и тег отправлены. Для PR открой ссылку из вывода git push.'
 fi
