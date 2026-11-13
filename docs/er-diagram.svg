@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="890" viewBox="0 0 1280 890">
+<rect width="1280" height="890" fill="#ffffff"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8" fill="#335c81"/></marker></defs>
+<style>text{font-family:monospace;fill:#14283f}.edge{fill:none;stroke:#335c81;stroke-width:2;marker-end:url(#arrow)}.label{font-size:14px;fill:#335c81}</style>
+<text x="20" y="30" font-size="23" font-weight="bold">Модель данных Delul</text>
+<text x="20" y="54" font-size="14">Стрелки направлены от внешнего ключа (FK) к родительской таблице (PK).</text>
+<path class="edge" d="M800 70 V40 H160 V70"/>
+<path class="edge" d="M660 180 H620"/>
+<path class="edge" d="M980 180 H940"/>
+<path class="edge" d="M160 480 V310"/>
+<path class="edge" d="M160 480 V370 H800 V310"/>
+<path class="edge" d="M340 590 H300"/>
+<path class="edge" d="M660 590 H620 V780 H160 V720"/>
+<path class="edge" d="M800 480 V400 H1120 V310"/>
+<path class="edge" d="M940 590 H980"/>
+<path class="edge" d="M1120 480 V310"/>
+<rect x="20" y="70" width="280" height="240" rx="8" fill="#f8fafc" stroke="#335c81" stroke-width="2"/>
+<path d="M20 112 H300" stroke="#335c81"/>
+<text x="34" y="98" font-size="20" font-weight="bold">users</text>
+<text x="34" y="140" font-size="15">id: UUID [PK]</text>
+<text x="34" y="165" font-size="15">email: string [UK]</text>
+<text x="34" y="190" font-size="15">full_name: string</text>
+<text x="34" y="215" font-size="15">role: string</text>
+<text x="34" y="240" font-size="15">group_name: string</text>
+<rect x="340" y="70" width="280" height="240" rx="8" fill="#f8fafc" stroke="#335c81" stroke-width="2"/>
+<path d="M340 112 H620" stroke="#335c81"/>
+<text x="354" y="98" font-size="20" font-weight="bold">categories</text>
+<text x="354" y="140" font-size="15">id: UUID [PK]</text>
+<text x="354" y="165" font-size="15">name: string [UK]</text>
+<text x="354" y="190" font-size="15">description: text</text>
+<text x="354" y="215" font-size="15">created_at: datetime</text>
+<rect x="660" y="70" width="280" height="240" rx="8" fill="#f8fafc" stroke="#335c81" stroke-width="2"/>
+<path d="M660 112 H940" stroke="#335c81"/>
+<text x="674" y="98" font-size="20" font-weight="bold">quizzes</text>
+<text x="674" y="140" font-size="15">id: UUID [PK]</text>
+<text x="674" y="165" font-size="15">title: string</text>
+<text x="674" y="190" font-size="15">author_id: UUID [FK]</text>
+<text x="674" y="215" font-size="15">category_id: UUID [FK]</text>
+<text x="674" y="240" font-size="15">status: string</text>
+<text x="674" y="265" font-size="15">results_released_at: datetime</text>
+<rect x="980" y="70" width="280" height="240" rx="8" fill="#f8fafc" stroke="#335c81" stroke-width="2"/>
+<path d="M980 112 H1260" stroke="#335c81"/>
+<text x="994" y="98" font-size="20" font-weight="bold">questions</text>
+<text x="994" y="140" font-size="15">id: UUID [PK]</text>
+<text x="994" y="165" font-size="15">quiz_id: UUID [FK]</text>
+<text x="994" y="190" font-size="15">text: text</text>
+<text x="994" y="215" font-size="15">explanation: text</text>
+<text x="994" y="240" font-size="15">position: int</text>
+<rect x="20" y="480" width="280" height="240" rx="8" fill="#f8fafc" stroke="#335c81" stroke-width="2"/>
+<path d="M20 522 H300" stroke="#335c81"/>
+<text x="34" y="508" font-size="20" font-weight="bold">attempts</text>
+<text x="34" y="550" font-size="15">id: UUID [PK]</text>
+<text x="34" y="575" font-size="15">user_id: UUID [FK]</text>
+<text x="34" y="600" font-size="15">quiz_id: UUID [FK]</text>
+<text x="34" y="625" font-size="15">status: string</text>
+<text x="34" y="650" font-size="15">submitted_at: datetime</text>
+<rect x="340" y="480" width="280" height="240" rx="8" fill="#f8fafc" stroke="#335c81" stroke-width="2"/>
+<path d="M340 522 H620" stroke="#335c81"/>
+<text x="354" y="508" font-size="20" font-weight="bold">results</text>
+<text x="354" y="550" font-size="15">id: UUID [PK]</text>
+<text x="354" y="575" font-size="15">attempt_id: UUID [FK, UK]</text>
+<text x="354" y="600" font-size="15">score: int</text>
+<text x="354" y="625" font-size="15">max_score: int</text>
+<text x="354" y="650" font-size="15">graded_at: datetime</text>
+<rect x="660" y="480" width="280" height="240" rx="8" fill="#f8fafc" stroke="#335c81" stroke-width="2"/>
+<path d="M660 522 H940" stroke="#335c81"/>
+<text x="674" y="508" font-size="20" font-weight="bold">attempt_answers</text>
+<text x="674" y="550" font-size="15">id: UUID [PK]</text>
+<text x="674" y="575" font-size="15">attempt_id: UUID [FK]</text>
+<text x="674" y="600" font-size="15">question_id: UUID [FK]</text>
+<text x="674" y="625" font-size="15">answer_option_id: UUID [FK]</text>
+<rect x="980" y="480" width="280" height="240" rx="8" fill="#f8fafc" stroke="#335c81" stroke-width="2"/>
+<path d="M980 522 H1260" stroke="#335c81"/>
+<text x="994" y="508" font-size="20" font-weight="bold">answer_options</text>
+<text x="994" y="550" font-size="15">id: UUID [PK]</text>
+<text x="994" y="575" font-size="15">question_id: UUID [FK]</text>
+<text x="994" y="600" font-size="15">text: text</text>
+<text x="994" y="625" font-size="15">is_correct: boolean</text>
+<text x="20" y="820" font-size="15">Связи: users 1:N quizzes, attempts; categories 1:N quizzes; quizzes 1:N questions, attempts.</text>
+<text x="20" y="847" font-size="15">questions 1:N answer_options, attempt_answers; attempts 1:N attempt_answers и 1:0..1 results.</text>
+<text x="20" y="874" font-size="15">answer_options 0..1:N attempt_answers. Полный список FK и правила целостности — в er-diagram.md.</text>
+</svg>
