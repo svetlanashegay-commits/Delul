@@ -1,4 +1,4 @@
-# User stories (урок 5)
+# Пользовательские истории (урок 5)
 
 > Проект: тестирование знаний в университете. Начальные гипотезы; уточним после интервью.
 
@@ -6,7 +6,7 @@
 
 MoSCoW: M — обязательно; S — желательно; C — можно добавить; W — не входит в текущую версию.
 
-<div><samp>|&nbsp;ID&nbsp;&nbsp;&nbsp;|&nbsp;Story&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;M/S/C/W&nbsp;|&nbsp;Условие&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+<div><samp>|&nbsp;ID&nbsp;&nbsp;&nbsp;|&nbsp;История&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;M/S/C/W&nbsp;|&nbsp;Условие&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
 |------|-------------------------------|---------|-------------------------|<br>
 |&nbsp;US-1&nbsp;|&nbsp;Как&nbsp;преподаватель,&nbsp;я&nbsp;хочу&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Тест&nbsp;с&nbsp;вопросами&nbsp;и&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;создать&nbsp;тест,&nbsp;чтобы&nbsp;проверить&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;верными&nbsp;ответами&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
