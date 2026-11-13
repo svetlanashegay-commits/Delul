@@ -1,9 +1,9 @@
 ```mermaid
 flowchart LR
-    Browser["Браузер"] --> Router["Router"]
-    Router --> Logic["Schema / Service"]
-    Logic --> Repository["Repository"]
-    Repository --> Model["Model (PostgreSQL)"]
-    Core["Core (config, database)"] -.-> Router
+    Browser["Браузер"] --> Router["Маршрутизатор"]
+    Router --> Logic["Схема / Сервис"]
+    Logic --> Repository["Репозиторий"]
+    Repository --> Model["Модель (PostgreSQL)"]
+    Core["Ядро (настройки, база данных)"] -.-> Router
     Core -.-> Repository
 ```
