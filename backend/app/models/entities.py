@@ -21,7 +21,7 @@ from app.core.database import Base
 class User(Base):
     __tablename__ = "users"
     __table_args__ = (
-        CheckConstraint("role IN ('teacher', 'student')", name="ck_users_role"),
+        CheckConstraint("role IN ('teacher', 'student', 'admin')", name="ck_users_role"),
         CheckConstraint("length(trim(email)) > 0", name="ck_users_email_not_blank"),
         CheckConstraint("length(trim(full_name)) > 0", name="ck_users_full_name_not_blank"),
         CheckConstraint(
@@ -35,6 +35,7 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String)
     role: Mapped[str] = mapped_column(String)
     group_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class Category(Base):
@@ -79,11 +80,16 @@ class Question(Base):
 
 class AnswerOption(Base):
     __tablename__ = "answer_options"
+    __table_args__ = (
+        UniqueConstraint("question_id", "position", name="uq_options_question_position"),
+        CheckConstraint("position >= 1", name="ck_options_position"),
+    )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     question_id: Mapped[UUID] = mapped_column(ForeignKey("questions.id", ondelete="RESTRICT"))
     text: Mapped[str] = mapped_column(Text)
     is_correct: Mapped[bool] = mapped_column(Boolean)
+    position: Mapped[int] = mapped_column(Integer)
 
 
 class Attempt(Base):
