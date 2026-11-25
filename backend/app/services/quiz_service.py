@@ -75,7 +75,10 @@ def list_quizzes(
 
 
 def read(db: Session, quiz_id: UUID, user: User) -> QuizRead:
-    return present(db, get_quiz(db, quiz_id, user), user)
+    quiz = get_quiz(db, quiz_id, user)
+    if user.role == "student":
+        return QuizRead(**QuizSummary.model_validate(quiz).model_dump(), questions=[])
+    return present(db, quiz, user)
 
 
 def create(db: Session, payload: QuizCreate, user: User) -> QuizRead:
@@ -87,6 +90,7 @@ def create(db: Session, payload: QuizCreate, user: User) -> QuizRead:
                 "title": payload.title,
                 "category_id": payload.category_id,
                 "author_id": user.id,
+                "time_limit_minutes": payload.time_limit_minutes,
             },
         )
         repository.add_questions(
