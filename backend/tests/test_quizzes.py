@@ -9,12 +9,19 @@ from seed import seed
 
 def payload(db):
     return {
-        "title": "New quiz", "category_id": str(db.scalar(select(Category.id))),
-        "questions": [{
-            "text": "Question", "explanation": "Explanation", "position": 1,
-            "options": [{"text": "Yes", "is_correct": True},
-                        {"text": "No", "is_correct": False}],
-        }],
+        "title": "New quiz",
+        "category_id": str(db.scalar(select(Category.id))),
+        "questions": [
+            {
+                "text": "Question",
+                "explanation": "Explanation",
+                "position": 1,
+                "options": [
+                    {"text": "Yes", "is_correct": True},
+                    {"text": "No", "is_correct": False},
+                ],
+            }
+        ],
     }
 
 
@@ -105,8 +112,14 @@ def test_demo_identity_and_admin_permissions(demo):
 def test_validation_and_missing_resources(demo):
     client, db, _ = demo
     path = f"/api/quizzes/{db.scalar(select(Quiz.id))}"
-    for body in [{}, {"title": None}, {"title": "  "}, {"status": "published"}]:
+    for body in [{}, {"title": "  "}, {"status": "published"}]:
         assert client.patch(path, json=body).status_code == 422
+    before = client.get(path).json()
+    response = client.patch(
+        path, json={"title": None, "category_id": None, "questions": None}
+    )
+    assert response.status_code == 200
+    assert response.json() == before
     data = payload(db)
     data["questions"] *= 2
     assert client.post("/api/quizzes", json=data).status_code == 422
