@@ -62,9 +62,7 @@ def test_student_visibility_and_mutation_denied(demo):
     db.commit()
     response = client.get(path)
     assert response.status_code == 200
-    question = response.json()["questions"][0]
-    assert "explanation" not in question
-    assert all("is_correct" not in option for option in question["options"])
+    assert response.json()["questions"] == []
     assert client.get("/api/quizzes").json()["total"] == 1
     assert client.post("/api/quizzes", json=payload(db)).status_code == 403
     assert client.patch(path, json={"title": "Forbidden"}).status_code == 403

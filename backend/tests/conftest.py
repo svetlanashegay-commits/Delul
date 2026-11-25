@@ -19,7 +19,8 @@ from seed import seed
 @pytest.fixture
 def demo(monkeypatch):
     engine = create_engine(
-        "sqlite+pysqlite:///:memory:", connect_args={"check_same_thread": False},
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
 
@@ -30,7 +31,9 @@ def demo(monkeypatch):
     Base.metadata.create_all(engine)  # Only this isolated, disposable test database.
     with Session(engine, expire_on_commit=False) as db:
         seed(db)
-        identity = SimpleNamespace(environment="local", demo_user_email="teacher@demo.kz")
+        identity = SimpleNamespace(
+            environment="local", demo_user_email="teacher@demo.kz", allow_demo_auth=True
+        )
         monkeypatch.setattr(deps, "settings", identity)
 
         def override_db():

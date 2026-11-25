@@ -18,7 +18,8 @@ def test_registration_stores_only_argon2id(demo):
         json={
             "email": "argon@example.com",
             "full_name": "Argon Test",
-            "role": "teacher",
+            "role": "student",
+            "group_name": "A-1",
             "password": password,
         },
     )
@@ -34,7 +35,8 @@ def test_registration_stores_only_argon2id(demo):
             json={
                 "email": user.email,
                 "full_name": "Duplicate",
-                "role": "teacher",
+                "role": "student",
+                "group_name": "A-1",
                 "password": password,
             },
         ).status_code
