@@ -18,7 +18,7 @@ class Register(InputModel):
     email: EmailStr
     full_name: TextValue
     password: SecretStr = Field(min_length=8, max_length=128)
-    role: Literal["teacher", "student"] = "student"
+    role: Literal["student"] = "student"
     group_name: TextValue | None = None
 
     @field_validator("email")

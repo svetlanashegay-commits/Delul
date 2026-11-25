@@ -19,9 +19,12 @@ class AttemptRead(BaseModel):
     id: UUID
     quiz_id: UUID
     status: str
-    submitted_at: datetime
-    score: int
-    max_score: int
+    submitted_at: datetime | None = None
+    score: int | None = None
+    max_score: int | None = None
+    deadline_at: datetime | None = None
+    focus_count: int = 0
+    blocked_reason: str | None = None
 
 
 class AttemptPage(BaseModel):

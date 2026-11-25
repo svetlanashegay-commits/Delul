@@ -27,6 +27,7 @@ class QuizCreate(InputModel):
     title: TextValue
     category_id: UUID
     questions: list[QuestionCreate] = Field(default_factory=list)
+    time_limit_minutes: int = Field(default=30, ge=1, le=180)
 
     @model_validator(mode="after")
     def unique_positions(self):
@@ -40,6 +41,7 @@ class QuizUpdate(InputModel):
     title: TextValue | None = None
     category_id: UUID | None = None
     questions: list[QuestionCreate] | None = None
+    time_limit_minutes: int | None = Field(default=None, ge=1, le=180)
 
     @model_validator(mode="after")
     def validate_changes(self):
@@ -74,6 +76,7 @@ class QuizSummary(BaseModel):
     author_id: UUID
     category_id: UUID
     status: str
+    time_limit_minutes: int
     results_released_at: datetime | None = None
 
 
