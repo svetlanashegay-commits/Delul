@@ -13,6 +13,7 @@ class Settings:
     environment: str
     database_url: str
     demo_user_email: str
+    allow_demo_auth: bool
 
 
 settings = Settings(
@@ -20,4 +21,5 @@ settings = Settings(
     environment=os.getenv("ENVIRONMENT", "local"),
     database_url=os.getenv("DATABASE_URL", ""),
     demo_user_email=os.getenv("DEMO_USER_EMAIL", "teacher@demo.kz"),
+    allow_demo_auth=os.getenv("ALLOW_DEMO_AUTH", "false").lower() == "true",
 )

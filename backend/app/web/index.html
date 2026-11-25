@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Delul — прохождение теста</title>
+  <link rel="stylesheet" href="/test-assets/test.css">
+  <script src="/test-assets/test.js" defer></script>
+</head>
+<body>
+<header><a href="/test" class="brand">Delul<span>Тестирование</span></a><div id="account"></div><button id="logout" class="subtle" hidden>Выйти</button></header>
+<main>
+  <div id="notice" role="status" aria-live="polite"></div>
+  <section id="auth" class="card">
+    <p class="eyebrow">Личный кабинет студента</p><h1>Войти в тестирование</h1>
+    <p>Войдите в свой аккаунт. Попытка закрепляется за аккаунтом и исходной вкладкой.</p>
+    <form id="login-form">
+      <label>Email<input id="email" type="email" autocomplete="username" required></label>
+      <label>Пароль<input id="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required></label>
+      <button type="submit">Войти</button>
+    </form>
+    <details><summary>Создать аккаунт студента</summary>
+      <form id="register-form">
+        <label>Полное имя<input name="full_name" autocomplete="name" required></label>
+        <label>Учебная группа<input name="group_name" required></label>
+        <label>Email<input name="email" type="email" autocomplete="username" required></label>
+        <label>Пароль<input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></label>
+        <button type="submit">Зарегистрироваться</button>
+      </form>
+    </details>
+  </section>
+  <section id="catalog" hidden><p class="eyebrow">Доступные тесты</p><h1>Выберите тест</h1><div id="quiz-list" class="grid"></div></section>
+  <section id="rules" class="card" hidden>
+    <p class="eyebrow">Перед началом</p><h1 id="rules-title"></h1>
+    <ul>
+      <li>Одна попытка на аккаунт. Начало сразу расходует её; обновление страницы не сбрасывает время.</li>
+      <li>Первый уход из вкладки, потеря фокуса или выход из полного экрана — предупреждение. Повторный уход закрывает доступ.</li>
+      <li>Если нет связи с сервером более 45 секунд, доступ закрывается. Убедитесь, что соединение устойчиво.</li>
+      <li>Вопросы и варианты перемешаны. Ответы сохраняются на сервере. По окончании времени засчитываются сохранённые ответы.</li>
+      <li>Копирование и печать на странице ограничены. Сайт не может запретить Google Объектив, снимок экрана или съёмку телефоном.</li>
+      <li>Не открывайте тест в другой вкладке. Закрытие вкладки лишает её ключа доступа; повторное начало невозможно.</li>
+    </ul>
+    <p id="duration"></p>
+    <label class="check"><input id="accept-rules" type="checkbox">Я прочитал правила и готов начать.</label>
+    <div class="actions"><button id="start-test" disabled>Начать попытку</button><button id="cancel-start" class="subtle">Назад</button></div>
+  </section>
+  <section id="exam" hidden>
+    <div class="exam-bar"><div><p class="eyebrow">Тест идёт</p><h1 id="exam-title"></h1></div><div class="clock"><span>Осталось</span><strong id="timer">—</strong></div></div>
+    <div id="focus-warning" class="warning" hidden><p>Зарегистрирован уход со страницы. При повторном уходе доступ закроется. Это событие не является доказательством списывания.</p><button id="return-fullscreen">Вернуться к тесту</button></div>
+    <div class="card quiz-content" id="question-card"><p id="progress" class="eyebrow"></p><h2 id="question-text"></h2><fieldset id="choices"><legend>Выберите ответ</legend></fieldset><p id="save-status" role="status"></p>
+      <div class="actions"><button id="previous" class="subtle">Предыдущий</button><button id="next">Следующий</button></div>
+    </div>
+    <div class="actions end"><button id="finish-test" class="danger">Завершить тест</button></div>
+  </section>
+  <section id="result" class="card" hidden><p class="eyebrow">Попытка закрыта</p><h1 id="result-title"></h1><p id="result-text"></p><p>Повторная попытка недоступна. В случае случайной блокировки обратитесь к преподавателю.</p><button id="back-to-list">К списку тестов</button></section>
+</main>
+<footer>Браузерные события — технический сигнал, а не доказательство списывания. Камера, микрофон и история просмотра не собираются.</footer>
+</body>
+</html>

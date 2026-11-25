@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     CheckConstraint,
     DateTime,
@@ -21,9 +22,13 @@ from app.core.database import Base
 class User(Base):
     __tablename__ = "users"
     __table_args__ = (
-        CheckConstraint("role IN ('teacher', 'student', 'admin')", name="ck_users_role"),
+        CheckConstraint(
+            "role IN ('teacher', 'student', 'admin')", name="ck_users_role"
+        ),
         CheckConstraint("length(trim(email)) > 0", name="ck_users_email_not_blank"),
-        CheckConstraint("length(trim(full_name)) > 0", name="ck_users_full_name_not_blank"),
+        CheckConstraint(
+            "length(trim(full_name)) > 0", name="ck_users_full_name_not_blank"
+        ),
         CheckConstraint(
             "role <> 'student' OR (group_name IS NOT NULL AND length(trim(group_name)) > 0)",
             name="ck_users_student_group",
@@ -44,13 +49,20 @@ class Category(Base):
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String, unique=True)
     description: Mapped[str] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
 
 class Quiz(Base):
     __tablename__ = "quizzes"
     __table_args__ = (
-        CheckConstraint("status IN ('draft', 'published', 'closed')", name="ck_quizzes_status"),
+        CheckConstraint(
+            "status IN ('draft', 'published', 'closed')", name="ck_quizzes_status"
+        ),
+        CheckConstraint(
+            "time_limit_minutes BETWEEN 1 AND 180", name="ck_quizzes_time_limit"
+        ),
         CheckConstraint(
             "results_released_at IS NULL OR status = 'closed'",
             name="ck_quizzes_results_closed",
@@ -60,16 +72,23 @@ class Quiz(Base):
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     title: Mapped[str] = mapped_column(String)
     author_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
-    category_id: Mapped[UUID] = mapped_column(ForeignKey("categories.id", ondelete="RESTRICT"))
+    category_id: Mapped[UUID] = mapped_column(
+        ForeignKey("categories.id", ondelete="RESTRICT")
+    )
     status: Mapped[str] = mapped_column(String, default="draft")
     results_released_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
+    )
+    time_limit_minutes: Mapped[int] = mapped_column(
+        Integer, default=30, server_default="30"
     )
 
 
 class Question(Base):
     __tablename__ = "questions"
-    __table_args__ = (UniqueConstraint("quiz_id", "position", name="uq_questions_quiz_position"),)
+    __table_args__ = (
+        UniqueConstraint("quiz_id", "position", name="uq_questions_quiz_position"),
+    )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     quiz_id: Mapped[UUID] = mapped_column(ForeignKey("quizzes.id", ondelete="RESTRICT"))
@@ -81,12 +100,16 @@ class Question(Base):
 class AnswerOption(Base):
     __tablename__ = "answer_options"
     __table_args__ = (
-        UniqueConstraint("question_id", "position", name="uq_options_question_position"),
+        UniqueConstraint(
+            "question_id", "position", name="uq_options_question_position"
+        ),
         CheckConstraint("position >= 1", name="ck_options_position"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
-    question_id: Mapped[UUID] = mapped_column(ForeignKey("questions.id", ondelete="RESTRICT"))
+    question_id: Mapped[UUID] = mapped_column(
+        ForeignKey("questions.id", ondelete="RESTRICT")
+    )
     text: Mapped[str] = mapped_column(Text)
     is_correct: Mapped[bool] = mapped_column(Boolean)
     position: Mapped[int] = mapped_column(Integer)
@@ -95,10 +118,14 @@ class AnswerOption(Base):
 class Attempt(Base):
     __tablename__ = "attempts"
     __table_args__ = (
-        CheckConstraint("status IN ('in_progress', 'submitted')", name="ck_attempts_status"),
+        UniqueConstraint("user_id", "quiz_id", name="uq_attempts_student_quiz"),
+        CheckConstraint(
+            "status IN ('in_progress', 'submitted', 'blocked', 'expired')",
+            name="ck_attempts_status",
+        ),
         CheckConstraint(
             "(status = 'in_progress' AND submitted_at IS NULL) OR "
-            "(status = 'submitted' AND submitted_at IS NOT NULL)",
+            "(status IN ('submitted', 'blocked', 'expired') AND submitted_at IS NOT NULL)",
             name="ck_attempts_submission_time",
         ),
     )
@@ -107,18 +134,40 @@ class Attempt(Base):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     quiz_id: Mapped[UUID] = mapped_column(ForeignKey("quizzes.id", ondelete="RESTRICT"))
     status: Mapped[str] = mapped_column(String, default="in_progress")
-    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    submitted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    deadline_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_seen_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    browser_token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    focus_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    blocked_reason: Mapped[str | None] = mapped_column(String, nullable=True)
+    question_order: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    option_order: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
 
 class AttemptAnswer(Base):
     __tablename__ = "attempt_answers"
     __table_args__ = (
-        UniqueConstraint("attempt_id", "question_id", name="uq_attempt_answers_attempt_question"),
+        UniqueConstraint(
+            "attempt_id", "question_id", name="uq_attempt_answers_attempt_question"
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
-    attempt_id: Mapped[UUID] = mapped_column(ForeignKey("attempts.id", ondelete="RESTRICT"))
-    question_id: Mapped[UUID] = mapped_column(ForeignKey("questions.id", ondelete="RESTRICT"))
+    attempt_id: Mapped[UUID] = mapped_column(
+        ForeignKey("attempts.id", ondelete="RESTRICT")
+    )
+    question_id: Mapped[UUID] = mapped_column(
+        ForeignKey("questions.id", ondelete="RESTRICT")
+    )
     answer_option_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("answer_options.id", ondelete="RESTRICT"), nullable=True
     )
@@ -127,7 +176,9 @@ class AttemptAnswer(Base):
 class Result(Base):
     __tablename__ = "results"
     __table_args__ = (
-        CheckConstraint("score >= 0 AND score <= max_score", name="ck_results_score_range"),
+        CheckConstraint(
+            "score >= 0 AND score <= max_score", name="ck_results_score_range"
+        ),
         CheckConstraint("max_score >= 0", name="ck_results_max_score_nonnegative"),
     )
 
@@ -137,4 +188,32 @@ class Result(Base):
     )
     score: Mapped[int] = mapped_column(Integer)
     max_score: Mapped[int] = mapped_column(Integer)
-    graded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    graded_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class AuthSession(Base):
+    __tablename__ = "auth_sessions"
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AttemptEvent(Base):
+    __tablename__ = "attempt_events"
+    __table_args__ = (
+        UniqueConstraint("attempt_id", "event_id", name="uq_attempt_event"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    attempt_id: Mapped[UUID] = mapped_column(
+        ForeignKey("attempts.id", ondelete="RESTRICT")
+    )
+    event_id: Mapped[UUID] = mapped_column(Uuid)
+    kind: Mapped[str] = mapped_column(String)
+    occurred_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
