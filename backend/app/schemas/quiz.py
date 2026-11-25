@@ -36,7 +36,7 @@ class QuizCreate(InputModel):
         return self
 
 
-class QuizPatch(InputModel):
+class QuizUpdate(InputModel):
     title: TextValue | None = None
     category_id: UUID | None = None
     questions: list[QuestionCreate] | None = None
@@ -44,8 +44,8 @@ class QuizPatch(InputModel):
     @model_validator(mode="after")
     def validate_changes(self):
         changes = self.model_dump(exclude_unset=True)
-        if not changes or any(value is None for value in changes.values()):
-            raise ValueError("Provide at least one non-null editable field")
+        if not changes:
+            raise ValueError("Provide at least one editable field")
         if self.questions is not None:
             positions = [q.position for q in self.questions]
             if len(positions) != len(set(positions)):

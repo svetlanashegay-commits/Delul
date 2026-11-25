@@ -51,8 +51,8 @@ class UserPatch(InputModel):
     @model_validator(mode="after")
     def require_changes(self):
         values = self.model_dump(exclude_unset=True)
-        if not values or any(value is None for value in values.values()):
-            raise ValueError("Provide at least one non-null editable field")
+        if not values:
+            raise ValueError("Provide at least one editable field")
         return self
 
 
