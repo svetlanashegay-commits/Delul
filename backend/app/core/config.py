@@ -12,10 +12,12 @@ class Settings:
     app_name: str
     environment: str
     database_url: str
+    demo_user_email: str
 
 
 settings = Settings(
     app_name=os.getenv("APP_NAME", "Delul"),
     environment=os.getenv("ENVIRONMENT", "local"),
     database_url=os.getenv("DATABASE_URL", ""),
+    demo_user_email=os.getenv("DEMO_USER_EMAIL", "teacher@demo.kz"),
 )
