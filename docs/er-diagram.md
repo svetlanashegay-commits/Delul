@@ -15,7 +15,7 @@
 | attempt_answers | id, attempt_id, question_id, answer_option_id | пара attempt_id/question_id уникальна; answer_option_id может быть NULL для пропуска |
 | results | id, attempt_id, score, max_score, graded_at | attempt_id уникален; 0 ≤ score ≤ max_score; max_score ≥ 0 |
 
-password_hash — необязательный хеш PBKDF2-SHA256, добавленный по новому заданию о регистрации. Открытых паролей и токенов нет. У демопользователей seed хеш NULL, поэтому их нельзя использовать для проверки login. Это изменение заменяет прежний план входа через Keycloak; Keycloak сейчас не используется.
+password_hash — необязательный хеш Argon2id (старые PBKDF2-хеши поддерживаются до успешного login), добавленный по новому заданию о регистрации. Открытых паролей и токенов нет. У демопользователей seed хеш NULL, поэтому их нельзя использовать для проверки login. Это изменение заменяет прежний план входа через Keycloak; Keycloak сейчас не используется.
 
 ## Связи
 
