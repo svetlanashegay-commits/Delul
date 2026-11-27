@@ -5,3 +5,4 @@ psycopg[binary]
 alembic
 python-dotenv
 email-validator
+PyJWT[crypto]>=2.10,<3

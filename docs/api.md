@@ -1,106 +1,31 @@
-# API Delul: учебная версия
+# API и матрица прав
 
-Актуальный контракт по модулям 1–6. Базовый путь `/api`, JSON, идентификаторы UUID. Реализованы все 18 эндпоинтов из таблиц ниже. Swagger: `/api/docs`.
+Все защищённые маршруты требуют Bearer access token Keycloak. Без токена или при неверной подписи/iss/aud/exp — 401; нет нужной роли — 403; сервер ключей недоступен — 503. Роли изменяются только в Keycloak. Регистрация и восстановление пароля выполняются на странице Keycloak.
 
-## Как определяется пользователь
+| Метод | Путь | Кто | Ответ |
+|---|---|---|---|
+| GET | /api/health | Анонимный | 200, состояние БД; 503 при недоступной БД |
+| GET | /api/auth/me | student, teacher, admin | 200; профиль создаётся по issuer и sub |
+| GET | /api/users | admin | 200, список с limit/offset |
+| GET | /api/users/{user_id} | admin | 200 / 404 |
+| PATCH | /api/users/{user_id} | admin | 200, имя/группа; роль менять нельзя (400) |
+| DELETE | /api/users/{user_id} | admin | 204; себя удалить нельзя (400) |
+| GET | /api/quizzes | student, teacher, admin | 200; student — опубликованные, teacher — свои и опубликованные, admin — все |
+| POST | /api/quizzes | teacher, admin | 201 |
+| GET | /api/quizzes/{quiz_id} | student, teacher, admin | 200 / 404; студенту не выдаются правильные ответы |
+| PATCH | /api/quizzes/{quiz_id} | teacher-владелец, admin | 200; чужой — 403 |
+| DELETE | /api/quizzes/{quiz_id} | teacher-владелец, admin | 204; чужой — 403 |
+| POST | /api/quizzes/{quiz_id}/questions | teacher-владелец, admin | 201; опубликованный тест — 400 |
+| PATCH | /api/questions/{question_id} | teacher-владелец, admin | 200 |
+| DELETE | /api/questions/{question_id} | teacher-владелец, admin | 204 |
+| POST | /api/quizzes/{quiz_id}/publish | teacher-владелец, admin | 200; без вопросов — 400 |
+| POST | /api/quizzes/{quiz_id}/attempts | student | 201; accepted_rules=true; повторная попытка — 409 |
+| GET | /api/attempts/me | student | 200, собственные попытки |
+| GET | /api/attempts/{attempt_id} | student-владелец | 200; X-Attempt-Token |
+| PATCH | /api/attempts/{attempt_id}/answers | student-владелец | 200; attempt_token |
+| POST | /api/attempts/{attempt_id}/heartbeat | student-владелец | 200; attempt_token |
+| POST | /api/attempts/{attempt_id}/events | student-владелец | 200; attempt_token |
+| POST | /api/attempts/{attempt_id}/submit | student-владелец | 200; attempt_token |
+| GET | /api/quizzes/{quiz_id}/attempts | teacher-владелец, admin | 200, результаты и события |
 
-Регистрация и login открыты всем. Login только проверяет пароль: токен, cookie и сессия не создаются. Он не переключает текущего пользователя.
-Для остальных учебных операций сервер определяет пользователя по `DEMO_USER_EMAIL` из корневого `.env`; по умолчанию `teacher@demo.kz`. Неизвестный email — 401. Роль берётся из БД, а не из запроса. Демозависимость работает только при `ENVIRONMENT=local`, вне него защищённые операции возвращают 401. Это локальный учебный режим, не полноценная аутентификация для публикации в интернете.
-
-## Служебный
-
-| Метод | Путь | Кто | Ответ | Таблицы |
-|-------|------|-----|-------|---------|
-| GET | `/api/health` | Все, без входа | 200: `status`, `environment`, `database`; при недоступной БД — 503 без деталей подключения | Нет, выполняет SELECT 1 |
-
-## Модули 1–2: регистрация и проверка входа
-
-| Метод | Путь | Кто | Ответ | Таблицы |
-|-------|------|-----|-------|---------|
-| POST | `/api/auth/register` | Все | 201; занятый email — 409; пароль короче 8 или длиннее 128 символов, неверный email, роль admin — 422 | users |
-| POST | `/api/auth/login` | Все | 200 с сообщением без токена; неверный email или пароль — 401 `Email немесе құпиясөз қате` | users |
-
-Регистрация принимает `email`, `full_name`, `password`, `role` (teacher/student, по умолчанию student), `group_name` (обязателен для student). Email приводится к нижнему регистру. Пароли сохраняются только как PBKDF2-SHA256 с индивидуальной случайной солью и 600000 итерациями. Пароль и хеш не выдаются ни в одном ответе; ошибка проверки данных не повторяет тело запроса.
-
-## Модуль 3: пользователи
-
-Все операции ниже доступны только admin; teacher и student получают 403.
-
-| Метод | Путь | Ответ | Таблицы |
-|-------|------|-------|---------|
-| GET | `/api/users` | 200, список с пагинацией | users |
-| GET | `/api/users/{id}` | 200 или 404 | users |
-| PATCH | `/api/users/{id}` | 200; свою роль менять нельзя — 400 | users, quizzes, attempts |
-| DELETE | `/api/users/{id}` | 204 без тела; удалить себя нельзя — 400; связанные тесты или попытки — 409 | users |
-
-PATCH принимает `full_name`, `role`, `group_name`. Для student нужна группа. Нельзя менять роль пользователя, уже связанного с тестами или попытками (409), чтобы не нарушить историю и правила авторства. Email, пароль, ID менять через этот запрос нельзя (422).
-
-## Модуль 4: тесты
-
-| Метод | Путь | Кто | Ответ | Таблицы |
-|-------|------|-----|-------|---------|
-| GET | `/api/quizzes` | student: опубликованные; teacher: свои и опубликованные; admin: все | 200, список | quizzes |
-| POST | `/api/quizzes` | teacher, admin | 201, черновик и заголовок Location | quizzes, categories, questions, answer_options |
-| GET | `/api/quizzes/{id}` | Все роли, по правилам видимости списка | 200 или 404; студенту без правильных ответов и пояснений | quizzes, questions, answer_options |
-| PATCH | `/api/quizzes/{id}` | Автор-teacher или admin | 200; чужой тест для teacher — 403; не черновик или есть попытки — 409 | quizzes, categories, questions, answer_options, attempts |
-| DELETE | `/api/quizzes/{id}` | Автор-teacher или admin | 204 без тела; чужой — 403; не черновик или есть попытки — 409 | quizzes, questions, answer_options, attempts |
-
-POST: `title`, `category_id`, необязательный `questions`. PATCH: только `title`, `category_id`, `questions`; пропущенные поля не меняются, переданный список вопросов заменяет весь прежний набор одной транзакцией. Пустой PATCH и NULL запрещены (422). Несуществующая категория — 422. Статус меняется только публикацией.
-
-Вложенный вопрос принимает `text`, `explanation`, `position` (от 1), `options`: объекты `text`, `is_correct`. Позиции вопросов уникальны внутри теста; порядок вариантов сохраняется в `answer_options.position`. Черновик может быть неполным; публикация проверяет корректность.
-
-## Модуль 5: вопросы
-
-| Метод | Путь | Кто | Ответ | Таблицы |
-|-------|------|-----|-------|---------|
-| POST | `/api/quizzes/{id}/questions` | Автор-teacher, admin | 201; опубликованный тест или неверный correct_index — 400; чужой — 403 | quizzes, questions, answer_options, attempts |
-| PATCH | `/api/questions/{id}` | Автор-teacher, admin | 200; не черновик — 400; чужой — 403 | quizzes, questions, answer_options, attempts |
-| DELETE | `/api/questions/{id}` | Автор-teacher, admin | 204 без тела, те же права и состояния | quizzes, questions, answer_options, attempts |
-
-Создание вопроса: `text`, `options` (массив минимум из двух строк), `correct_index` (**индекс от 0**), необязательные `explanation` и `position`. Если позиция не указана, вопрос добавляется в конец. Индекс должен удовлетворять `0 ≤ correct_index < len(options)`, иначе 400. При PATCH с заменой options обязательно передать correct_index (400). PATCH только correct_index меняет правильный ответ в существующем порядке. Занятая позиция — 409. ID и связь с тестом не меняются.
-
-## Модуль 6: публикация и сдача
-
-| Метод | Путь | Кто | Ответ | Таблицы |
-|-------|------|-----|-------|---------|
-| POST | `/api/quizzes/{id}/publish` | Автор-teacher, admin | 200; чужой — 403; пустой или не черновик — 400 | quizzes, questions, answer_options |
-| POST | `/api/quizzes/{id}/attempts` | student | 201, сразу результат; не опубликован или неверный состав ответов — 400 | quizzes, questions, answer_options, attempts, attempt_answers, results |
-| GET | `/api/attempts/me` | student | 200, только собственные завершённые попытки с результатами | attempts, results |
-
-Публикация требует хотя бы один вопрос, минимум два варианта и ровно один правильный ответ в каждом вопросе. После публикации содержимое не меняется.
-
-Сдача принимает:
-
-```json
-{
-  "answers": [
-    {"question_id": "UUID вопроса", "answer_option_id": "UUID варианта или null"}
-  ]
-}
-```
-
-Каждый вопрос теста должен быть указан ровно один раз; число ответов должно совпадать с числом вопросов, выбранный вариант принадлежать указанному вопросу. Нарушение — 400. NULL означает пропуск. За правильный ответ — 1 балл, за пропуск или неверный — 0. Ответ содержит `id`, `quiz_id`, `status: submitted`, `submitted_at`, `score`, `max_score`. Правильные варианты не выдаются. Создание попытки, ответов и результата — одна транзакция. Повторный POST создаёт новую самостоятельную попытку; ограничения числа попыток пока нет.
-
-Новый учебный контракт заменяет прежнюю двухэтапную отправку и открытие результатов: баллы теперь выдаются сразу при сдаче. `results_released_at` и статус closed сохранены в модели для совместимости, но эндпоинта закрытия и разбора ошибок здесь пока нет.
-
-## Общие правила
-
-- Списки возвращают `items`, `total`, `limit`, `offset`. По умолчанию limit=20, offset=0; допустимы limit от 1 до 100, offset от 0. Для тестов есть фильтр `category_id`.
-- UUID неверного формата, неизвестные поля и некорректная структура — 422. Отсутствующий ресурс — 404. Запрещённая роль — 403; неизвестная демоличность — 401.
-- Ошибки: `{"detail": "сообщение"}`; ошибки валидации — массив в detail. Секреты и детали SQL не возвращаются.
-- Все DELETE возвращают пустое тело и 204. Связанные с историей попыток данные защищены FK RESTRICT; конфликт — 409.
-- Роутеры вызывают сервисы, SQL находится в репозиториях. Модели — SQLAlchemy 2, схемы ответов — Pydantic.
-
-## Подготовка и запуск
-
-Из корня проекта установите `backend/requirements-dev.txt` в виртуальное окружение. Задайте локальный DATABASE_URL, затем из backend:
-
-```text
-alembic upgrade head
-python seed.py
-uvicorn app.main:app --reload
-pytest -q
-ruff check .
-```
-
-Начальная миграция рассчитана на новую пустую БД. Не применяйте её поверх вручную созданных таблиц без сверки схемы. Seed добавляет teacher@demo.kz, student@demo.kz (группа DEMO-1), admin@demo.kz, категорию Demo и один тест. Повторный запуск не создаёт дубликатов. Демоаккаунты seed без паролей и login для них возвращает 401; для проверки login зарегистрируйте нового пользователя. Для работы от другой роли измените DEMO_USER_EMAIL и перезапустите сервер. Реальные секреты и .env в Git не добавляются.
+Связь данных: users → quizzes → questions → answer_options; users и quizzes → attempts → attempt_answers/results/attempt_events. categories группирует quizzes. Старые auth_sessions не используются для авторизации; сохранены в истории БД без активных cookie endpoints. Все таблицы описаны в er-diagram.md.

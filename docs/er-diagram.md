@@ -1,21 +1,25 @@
+> Урок 10: авторизация только Keycloak; users.password_hash удалён миграцией 0005. Разделы о прежних cookie-сессиях ниже описывают историю проекта. Актуальные маршруты и права: api.md.
+
 # Модель данных Delul
 
-Актуальна для учебного API модулей 1–6 из api.md. Восемь таблиц, во всех UUID id — первичный ключ. Новая начальная миграция содержит всю эту схему.
+Актуальна для учебного API модулей 1–6 из api.md. Десять таблиц, во всех UUID id — первичный ключ. Схему создают начальная ревизия и последующие миграции 0002/0003.
 
 ## Таблицы
 
 | Таблица | Поля | Ограничения |
 |---------|------|-------------|
-| users | id, email, full_name, role, group_name, password_hash | email уникален; role: teacher/student/admin; имя и email непустые; группе student нужна непустая group_name |
+| users | id, email, full_name, role, group_name, password_hash, keycloak_id, keycloak_issuer | email уникален; role: teacher/student/admin; имя и email непустые; группе student нужна непустая group_name |
 | categories | id, name, description, created_at | name уникален, created_at задаётся БД |
-| quizzes | id, title, author_id, category_id, status, results_released_at | автор и категория обязательны; статусы draft/published/closed; results_released_at допустим только для closed |
+| quizzes | id, title, author_id, category_id, status, results_released_at, time_limit_minutes | автор и категория обязательны; статусы draft/published/closed; results_released_at допустим только для closed |
 | questions | id, quiz_id, text, explanation, position | пара quiz_id/position уникальна |
 | answer_options | id, question_id, text, is_correct, position | пара question_id/position уникальна; position от 1; порядок вариантов устойчив |
-| attempts | id, user_id, quiz_id, status, submitted_at | in_progress: submitted_at NULL; submitted: время обязательно |
+| attempts | id, user_id, quiz_id, status, submitted_at, started_at, deadline_at, last_seen_at, browser_token_hash, focus_count, blocked_reason, question_order, option_order | UNIQUE(user_id, quiz_id); in_progress: submitted_at NULL; submitted/blocked/expired: время обязательно |
 | attempt_answers | id, attempt_id, question_id, answer_option_id | пара attempt_id/question_id уникальна; answer_option_id может быть NULL для пропуска |
 | results | id, attempt_id, score, max_score, graded_at | attempt_id уникален; 0 ≤ score ≤ max_score; max_score ≥ 0 |
+| auth_sessions | id, user_id, token_hash, expires_at | токен уникален; хранится только хеш; user_id FK ON DELETE CASCADE |
+| attempt_events | id, attempt_id, event_id, kind, occurred_at | пара attempt_id/event_id уникальна; FK ON DELETE RESTRICT |
 
-password_hash — необязательный хеш PBKDF2-SHA256, добавленный по новому заданию о регистрации. Открытых паролей и токенов нет. У демопользователей seed хеш NULL, поэтому их нельзя использовать для проверки login. Это изменение заменяет прежний план входа через Keycloak; Keycloak сейчас не используется.
+password_hash — необязательный хеш Argon2id (старые PBKDF2-хеши поддерживаются до успешного login), добавленный по новому заданию о регистрации. Открытых паролей и токенов нет. У демопользователей seed хеш NULL, поэтому их нельзя использовать для проверки login. Локальный хеш используется в AUTH_MODE=local; для AUTH_MODE=keycloak предусмотрена отдельная проверенная идентичность issuer/sub.
 
 ## Связи
 
@@ -30,12 +34,14 @@ password_hash — необязательный хеш PBKDF2-SHA256, добав�
 - Один вариант может быть выбран во многих ответах: attempt_answers.answer_option_id → answer_options.id.
 - Одной завершённой попытке соответствует один результат: results.attempt_id → attempts.id, UNIQUE.
 
-Все десять FK имеют ON DELETE RESTRICT. Удаление черновика без попыток сервис выполняет в порядке варианты → вопросы → тест. История попыток не удаляется каскадом.
+Десять исходных FK и FK событий имеют ON DELETE RESTRICT; сессии пользователя удаляются через ON DELETE CASCADE. Удаление черновика без попыток сервис выполняет в порядке варианты → вопросы → тест. История попыток не удаляется каскадом.
 
 ## ER-диаграмма
 
 ```mermaid
 erDiagram
+    users ||--o{ auth_sessions : authenticates
+    attempts ||--o{ attempt_events : records
     users ||--o{ quizzes : creates
     categories ||--o{ quizzes : groups
     quizzes ||--o{ questions : contains
@@ -53,6 +59,8 @@ erDiagram
         string role
         string group_name
         string password_hash
+        string keycloak_id
+        string keycloak_issuer
     }
     categories {
         uuid id PK
@@ -67,6 +75,7 @@ erDiagram
         uuid category_id FK
         string status
         datetime results_released_at
+        int time_limit_minutes
     }
     questions {
         uuid id PK
@@ -88,6 +97,27 @@ erDiagram
         uuid quiz_id FK
         string status
         datetime submitted_at
+        datetime started_at
+        datetime deadline_at
+        datetime last_seen_at
+        string browser_token_hash
+        int focus_count
+        string blocked_reason
+        json question_order
+        json option_order
+    }
+    auth_sessions {
+        uuid id PK
+        uuid user_id FK
+        string token_hash UK
+        datetime expires_at
+    }
+    attempt_events {
+        uuid id PK
+        uuid attempt_id FK
+        uuid event_id
+        string kind
+        datetime occurred_at
     }
     attempt_answers {
         uuid id PK
@@ -111,3 +141,7 @@ erDiagram
 Студенту GET теста не выдаёт is_correct и explanation. Баллы выдаются сразу после сдачи; прежний сценарий отложенного открытия результатов заменён новым заданием. results_released_at сохранён для совместимости; отдельного просмотра разбора ошибок пока нет.
 
 Начальная миграция предназначена для пустой БД; существующую вручную созданную схему нужно предварительно сопоставить. Тесты создают отдельную временную БД и не используют рабочие данные.
+
+Одна попытка на аккаунт и тест закреплена ограничением UNIQUE. Ключ исходной вкладки хранится только как хеш, а порядок вопросов и вариантов — в JSON. Подробные состояния и правила: [test-protection.md](test-protection.md). К пользовательским профилям добавлены cookie-сессии: их FK удаляется каскадно при удалении пользователя; история попыток и событий ограничена RESTRICT.
+
+Миграция 0004 добавляет nullable keycloak_id/keycloak_issuer: оба значения NULL для локального профиля либо оба заполнены; пара уникальна. Связь по email не выполняется автоматически, ID локального пользователя и история попыток сохраняются. Пароль Keycloak и его токены в users не записываются. Локальный password_hash остаётся для совместимого local-режима.

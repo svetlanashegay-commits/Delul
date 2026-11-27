@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Delul вЂ” РїСЂРѕС…РѕР¶РґРµРЅРёРµ С‚РµСЃС‚Р°</title>
+  <link rel="stylesheet" href="/test-assets/test.css">
+  <script src="/test-assets/oidc.js" defer></script>
+<script src="/test-assets/test.js" defer></script>
+</head>
+<body>
+<header><a href="/test" class="brand">Delul<span>РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ</span></a><div id="account"></div><button id="logout" class="subtle" hidden>Р’С‹Р№С‚Рё</button></header>
+<main>
+  <div id="notice" role="status" aria-live="polite"></div>
+  <section id="auth" class="card"><h1>Войти в тестирование</h1>
+<p>Вход и регистрация выполняются в Keycloak. Приложение не получает пароль.</p>
+<button id="keycloak-login">Войти или зарегистрироваться</button></section>
+  <section id="catalog" hidden><p class="eyebrow">Р”РѕСЃС‚СѓРїРЅС‹Рµ С‚РµСЃС‚С‹</p><h1>Р’С‹Р±РµСЂРёС‚Рµ С‚РµСЃС‚</h1><div id="quiz-list" class="grid"></div></section>
+  <section id="rules" class="card" hidden>
+    <p class="eyebrow">РџРµСЂРµРґ РЅР°С‡Р°Р»РѕРј</p><h1 id="rules-title"></h1>
+    <ul>
+      <li>РћРґРЅР° РїРѕРїС‹С‚РєР° РЅР° Р°РєРєР°СѓРЅС‚. РќР°С‡Р°Р»Рѕ СЃСЂР°Р·Сѓ СЂР°СЃС…РѕРґСѓРµС‚ РµС‘; РѕР±РЅРѕРІР»РµРЅРёРµ СЃС‚СЂР°РЅРёС†С‹ РЅРµ СЃР±СЂР°СЃС‹РІР°РµС‚ РІСЂРµРјСЏ.</li>
+      <li>РџРµСЂРІС‹Р№ СѓС…РѕРґ РёР· РІРєР»Р°РґРєРё, РїРѕС‚РµСЂСЏ С„РѕРєСѓСЃР° РёР»Рё РІС‹С…РѕРґ РёР· РїРѕР»РЅРѕРіРѕ СЌРєСЂР°РЅР° вЂ” РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ. РџРѕРІС‚РѕСЂРЅС‹Р№ СѓС…РѕРґ Р·Р°РєСЂС‹РІР°РµС‚ РґРѕСЃС‚СѓРї.</li>
+      <li>Р•СЃР»Рё РЅРµС‚ СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј Р±РѕР»РµРµ 45 СЃРµРєСѓРЅРґ, РґРѕСЃС‚СѓРї Р·Р°РєСЂС‹РІР°РµС‚СЃСЏ. РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ СЃРѕРµРґРёРЅРµРЅРёРµ СѓСЃС‚РѕР№С‡РёРІРѕ.</li>
+      <li>Р’РѕРїСЂРѕСЃС‹ Рё РІР°СЂРёР°РЅС‚С‹ РїРµСЂРµРјРµС€Р°РЅС‹. РћС‚РІРµС‚С‹ СЃРѕС…СЂР°РЅСЏСЋС‚СЃСЏ РЅР° СЃРµСЂРІРµСЂРµ. РџРѕ РѕРєРѕРЅС‡Р°РЅРёРё РІСЂРµРјРµРЅРё Р·Р°СЃС‡РёС‚С‹РІР°СЋС‚СЃСЏ СЃРѕС…СЂР°РЅС‘РЅРЅС‹Рµ РѕС‚РІРµС‚С‹.</li>
+      <li>РљРѕРїРёСЂРѕРІР°РЅРёРµ Рё РїРµС‡Р°С‚СЊ РЅР° СЃС‚СЂР°РЅРёС†Рµ РѕРіСЂР°РЅРёС‡РµРЅС‹. РЎР°Р№С‚ РЅРµ РјРѕР¶РµС‚ Р·Р°РїСЂРµС‚РёС‚СЊ Google РћР±СЉРµРєС‚РёРІ, СЃРЅРёРјРѕРє СЌРєСЂР°РЅР° РёР»Рё СЃСЉС‘РјРєСѓ С‚РµР»РµС„РѕРЅРѕРј.</li>
+      <li>РќРµ РѕС‚РєСЂС‹РІР°Р№С‚Рµ С‚РµСЃС‚ РІ РґСЂСѓРіРѕР№ РІРєР»Р°РґРєРµ. Р—Р°РєСЂС‹С‚РёРµ РІРєР»Р°РґРєРё Р»РёС€Р°РµС‚ РµС‘ РєР»СЋС‡Р° РґРѕСЃС‚СѓРїР°; РїРѕРІС‚РѕСЂРЅРѕРµ РЅР°С‡Р°Р»Рѕ РЅРµРІРѕР·РјРѕР¶РЅРѕ.</li>
+    </ul>
+    <p id="duration"></p>
+    <label class="check"><input id="accept-rules" type="checkbox">РЇ РїСЂРѕС‡РёС‚Р°Р» РїСЂР°РІРёР»Р° Рё РіРѕС‚РѕРІ РЅР°С‡Р°С‚СЊ.</label>
+    <div class="actions"><button id="start-test" disabled>РќР°С‡Р°С‚СЊ РїРѕРїС‹С‚РєСѓ</button><button id="cancel-start" class="subtle">РќР°Р·Р°Рґ</button></div>
+  </section>
+  <section id="exam" hidden>
+    <div class="exam-bar"><div><p class="eyebrow">РўРµСЃС‚ РёРґС‘С‚</p><h1 id="exam-title"></h1></div><div class="clock"><span>РћСЃС‚Р°Р»РѕСЃСЊ</span><strong id="timer">вЂ”</strong></div></div>
+    <div id="focus-warning" class="warning" hidden><p>Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ СѓС…РѕРґ СЃРѕ СЃС‚СЂР°РЅРёС†С‹. РџСЂРё РїРѕРІС‚РѕСЂРЅРѕРј СѓС…РѕРґРµ РґРѕСЃС‚СѓРї Р·Р°РєСЂРѕРµС‚СЃСЏ. Р­С‚Рѕ СЃРѕР±С‹С‚РёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РґРѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕРј СЃРїРёСЃС‹РІР°РЅРёСЏ.</p><button id="return-fullscreen">Р’РµСЂРЅСѓС‚СЊСЃСЏ Рє С‚РµСЃС‚Сѓ</button></div>
+    <div class="card quiz-content" id="question-card"><p id="progress" class="eyebrow"></p><h2 id="question-text"></h2><fieldset id="choices"><legend>Р’С‹Р±РµСЂРёС‚Рµ РѕС‚РІРµС‚</legend></fieldset><p id="save-status" role="status"></p>
+      <div class="actions"><button id="previous" class="subtle">РџСЂРµРґС‹РґСѓС‰РёР№</button><button id="next">РЎР»РµРґСѓСЋС‰РёР№</button></div>
+    </div>
+    <div class="actions end"><button id="finish-test" class="danger">Р—Р°РІРµСЂС€РёС‚СЊ С‚РµСЃС‚</button></div>
+  </section>
+  <section id="result" class="card" hidden><p class="eyebrow">РџРѕРїС‹С‚РєР° Р·Р°РєСЂС‹С‚Р°</p><h1 id="result-title"></h1><p id="result-text"></p><p>РџРѕРІС‚РѕСЂРЅР°СЏ РїРѕРїС‹С‚РєР° РЅРµРґРѕСЃС‚СѓРїРЅР°. Р’ СЃР»СѓС‡Р°Рµ СЃР»СѓС‡Р°Р№РЅРѕР№ Р±Р»РѕРєРёСЂРѕРІРєРё РѕР±СЂР°С‚РёС‚РµСЃСЊ Рє РїСЂРµРїРѕРґР°РІР°С‚РµР»СЋ.</p><button id="back-to-list">Рљ СЃРїРёСЃРєСѓ С‚РµСЃС‚РѕРІ</button></section>
+</main>
+<footer>Р‘СЂР°СѓР·РµСЂРЅС‹Рµ СЃРѕР±С‹С‚РёСЏ вЂ” С‚РµС…РЅРёС‡РµСЃРєРёР№ СЃРёРіРЅР°Р», Р° РЅРµ РґРѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ СЃРїРёСЃС‹РІР°РЅРёСЏ. РљР°РјРµСЂР°, РјРёРєСЂРѕС„РѕРЅ Рё РёСЃС‚РѕСЂРёСЏ РїСЂРѕСЃРјРѕС‚СЂР° РЅРµ СЃРѕР±РёСЂР°СЋС‚СЃСЏ.</footer>
+</body>
+</html>

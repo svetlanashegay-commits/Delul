@@ -1,5 +1,7 @@
 """Local demo data. Run from backend: python seed.py (after migrations)."""
 
+from uuid import NAMESPACE_URL, uuid5
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -19,7 +21,9 @@ def seed(db: Session) -> None:
         ]:
             user = db.scalar(select(User).where(User.email == email))
             if user is None:
-                db.add(User(email=email, full_name=name, role=role, group_name=group))
+                db.add(User(email=email, full_name=name, role=role, group_name=group,
+                            keycloak_id=str(uuid5(NAMESPACE_URL, "delul/keycloak/" + role)),
+                            keycloak_issuer=settings.keycloak_issuer))
             elif user.role != role:
                 raise ValueError(f"Existing demo account has a different role: {email}")
         db.flush()
@@ -29,22 +33,34 @@ def seed(db: Session) -> None:
             category = Category(name="Demo", description="Demo quizzes")
             db.add(category)
             db.flush()
-        quiz = db.scalar(select(Quiz).where(
-            Quiz.title == "Demo quiz", Quiz.author_id == teacher.id,
-            Quiz.category_id == category.id,
-        ))
+        quiz = db.scalar(
+            select(Quiz).where(
+                Quiz.title == "Demo quiz",
+                Quiz.author_id == teacher.id,
+                Quiz.category_id == category.id,
+            )
+        )
         if quiz is None:
-            quiz = Quiz(title="Demo quiz", author_id=teacher.id, category_id=category.id)
+            quiz = Quiz(
+                title="Demo quiz", author_id=teacher.id, category_id=category.id
+            )
             db.add(quiz)
             db.flush()
-            add_questions(db, quiz.id, [QuestionCreate(
-                text="What does a primary key identify?", position=1,
-                explanation="A primary key uniquely identifies a row.",
-                options=[
-                    {"text": "A row", "is_correct": True},
-                    {"text": "A database server", "is_correct": False},
+            add_questions(
+                db,
+                quiz.id,
+                [
+                    QuestionCreate(
+                        text="What does a primary key identify?",
+                        position=1,
+                        explanation="A primary key uniquely identifies a row.",
+                        options=[
+                            {"text": "A row", "is_correct": True},
+                            {"text": "A database server", "is_correct": False},
+                        ],
+                    ).model_dump()
                 ],
-            )])
+            )
         db.commit()
     except Exception:
         db.rollback()

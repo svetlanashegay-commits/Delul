@@ -1,0 +1,195 @@
+{
+  "realm": "delul",
+  "enabled": true,
+  "displayName": "Delul",
+  "sslRequired": "none",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 300,
+  "roles": {
+    "realm": [
+      {
+        "name": "student",
+        "description": "Студент: проходит опубликованные тесты"
+      },
+      {
+        "name": "teacher",
+        "description": "Преподаватель: создаёт тесты и проверяет работы"
+      },
+      {
+        "name": "admin",
+        "description": "Администратор: управляет пользователями"
+      },
+      {
+        "name": "offline_access"
+      },
+      {
+        "name": "uma_authorization"
+      },
+      {
+        "name": "default-roles-delul",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "student",
+            "offline_access",
+            "uma_authorization"
+          ]
+        }
+      }
+    ]
+  },
+  "defaultRole": {
+    "name": "default-roles-delul",
+    "composite": true,
+    "composites": {
+      "realm": [
+        "student",
+        "offline_access",
+        "uma_authorization"
+      ]
+    }
+  },
+  "clients": [
+    {
+      "clientId": "delul-web",
+      "name": "Delul browser and Swagger",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:8000/*##http://localhost:8001/*##http://localhost:8002/*##http://localhost:3000/*##http://127.0.0.1:8000/*##http://127.0.0.1:8001/*##http://127.0.0.1:8002/*##http://127.0.0.1:3000/*"
+      },
+      "redirectUris": [
+        "http://localhost:8000/*",
+        "http://localhost:8001/*",
+        "http://localhost:8002/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:8000/*",
+        "http://127.0.0.1:8001/*",
+        "http://127.0.0.1:8002/*",
+        "http://127.0.0.1:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8000",
+        "http://localhost:8001",
+        "http://localhost:8002",
+        "http://localhost:3000",
+        "http://127.0.0.1:8000",
+        "http://127.0.0.1:8001",
+        "http://127.0.0.1:8002",
+        "http://127.0.0.1:3000"
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "offline_access"
+      ],
+      "protocolMappers": [
+        {
+          "name": "delul-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "delul-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "false"
+          }
+        },
+        {
+          "name": "student-group",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "group_name",
+            "claim.name": "group_name",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "bfef859c-ef96-5722-93d5-255727c3630e",
+      "username": "student@demo.kz",
+      "email": "student@demo.kz",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Student",
+      "realmRoles": [
+        "student"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-pass-123",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "group_name": [
+          "DEMO-1"
+        ]
+      }
+    },
+    {
+      "id": "8cbdda86-8d0c-52a8-a00a-5fdf8bad7829",
+      "username": "teacher@demo.kz",
+      "email": "teacher@demo.kz",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Teacher",
+      "realmRoles": [
+        "teacher"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-pass-123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "3acabd78-44ca-5c2e-8ce8-274b1a97357a",
+      "username": "admin@demo.kz",
+      "email": "admin@demo.kz",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Admin",
+      "realmRoles": [
+        "admin"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-pass-123",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}
