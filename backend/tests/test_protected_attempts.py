@@ -5,9 +5,8 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
-from app.core.passwords import hash_password
-from app.core.tokens import COOKIE_NAME, token_hash, utc
-from app.models import Attempt, AttemptEvent, AuthSession, Quiz, Result, User
+from app.core.tokens import utc
+from app.models import Attempt, AttemptEvent, Quiz, Result, User
 from app.services import protected_attempt_service as service
 
 
@@ -17,16 +16,7 @@ def secure(demo):
     quiz_id = str(db.scalar(select(Quiz.id)))
     assert client.post(f"/api/quizzes/{quiz_id}/publish").status_code == 200
     student = db.scalar(select(User).where(User.role == "student"))
-    student.password_hash = hash_password("Test-student-123")
-    db.commit()
-    response = client.post(
-        "/api/auth/session",
-        json={
-            "email": student.email,
-            "password": "Test-student-123",
-        },
-    )
-    assert response.status_code == 200
+    identity.demo_user_email = student.email
     return client, db, identity, quiz_id, student.id
 
 
@@ -39,44 +29,12 @@ def start(secure):
     return response.json()
 
 
-def test_real_session_cookie_logout_expiry_and_no_public_privileged_roles(demo):
-    client, db, identity = demo
-    identity.allow_demo_auth = False
-    assert client.get("/api/quizzes").status_code == 401
-    for role in ["teacher", "admin"]:
-        assert (
-            client.post(
-                "/api/auth/register",
-                json={
-                    "email": "person@example.com",
-                    "full_name": "Person",
-                    "password": "Test-pass-123",
-                    "role": role,
-                },
-            ).status_code
-            == 422
-        )
-    user = db.scalar(select(User).where(User.role == "student"))
-    user.password_hash = hash_password("Test-pass-123")
-    db.commit()
-    response = client.post(
-        "/api/auth/session", json={"email": user.email, "password": "Test-pass-123"}
-    )
-    assert response.status_code == 200
-    assert "HttpOnly" in response.headers["set-cookie"]
-    assert "SameSite=strict" in response.headers["set-cookie"]
-    raw = client.cookies.get(COOKIE_NAME)
-    stored = db.scalar(select(AuthSession))
-    assert stored.token_hash == token_hash(raw) and stored.token_hash != raw
-    assert client.get("/api/auth/me").json()["id"] == str(user.id)
-    assert client.post("/api/auth/logout").status_code == 204
-    assert client.get("/api/auth/me").status_code == 401
-    assert db.scalar(select(func.count()).select_from(AuthSession)) == 0
 
 
 def test_start_requires_rules_and_real_session_and_has_no_bypass(demo):
     client, db, _ = demo
     quiz_id = str(db.scalar(select(Quiz.id)))
+    _.allow_demo_auth = False
     assert (
         client.post(
             f"/api/quizzes/{quiz_id}/attempts", json={"accepted_rules": True}
@@ -162,7 +120,7 @@ def test_save_and_submit_are_atomic_and_cannot_be_repeated(secure):
 
 
 def test_first_focus_warns_duplicate_is_ignored_second_blocks(secure):
-    client, db, _, _, _ = secure
+    client, db, identity, _, _ = secure
     data = start(secure)
     base = f"/api/attempts/{data['id']}"
     body = {
@@ -226,7 +184,7 @@ def test_missing_heartbeat_closes_access_permanently(secure, monkeypatch):
 
 
 def test_foreign_session_and_modified_tokens_are_rejected(secure):
-    client, db, _, _, _ = secure
+    client, db, identity, _, _ = secure
     data = start(secure)
     base = f"/api/attempts/{data['id']}"
     assert (
@@ -238,17 +196,10 @@ def test_foreign_session_and_modified_tokens_are_rejected(secure):
         full_name="Other",
         group_name="B",
         role="student",
-        password_hash=hash_password("Test-student-123"),
     )
     db.add(other)
     db.commit()
-    assert (
-        client.post(
-            "/api/auth/session",
-            json={"email": other.email, "password": "Test-student-123"},
-        ).status_code
-        == 200
-    )
+    identity.demo_user_email = other.email
     assert (
         client.post(
             base + "/submit", json={"attempt_token": data["attempt_token"]}
@@ -306,13 +257,6 @@ def test_author_reviews_attempts_but_other_users_cannot(secure):
     assert client.get(f"/api/quizzes/{quiz_id}/attempts").status_code == 403
 
 
-def test_expired_cookie_does_not_fall_back_to_demo_identity(secure):
-    client, db, _, _, _ = secure
-    session = db.scalar(select(AuthSession))
-    session.expires_at = datetime.now(UTC) - timedelta(seconds=1)
-    db.commit()
-    assert client.get("/api/auth/me").status_code == 401
-    assert client.get("/api/quizzes").status_code == 401
 
 
 def test_leaving_until_after_deadline_still_records_connection_block(

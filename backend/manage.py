@@ -1,30 +1,40 @@
-"""Local operator tool: python manage.py set-password EMAIL. Never prints passwords."""
+"""Link an existing profile: python manage.py link-keycloak EMAIL SUBJECT."""
 
 import argparse
-from getpass import getpass
 
+from app.core.config import settings
 from app.core.database import SessionLocal
-from app.core.passwords import hash_password
 from app.repositories import session_repository, user_repository
 from app.repositories.unit_of_work import transaction
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["set-password"])
+    parser.add_argument("command", choices=["link-keycloak"])
     parser.add_argument("email")
+    parser.add_argument("subject", nargs="?")
+    parser.add_argument("--issuer", default=settings.keycloak_issuer)
     args = parser.parse_args()
-    password = getpass("New password (at least 8 characters): ")
-    if not 8 <= len(password) <= 128 or password != getpass("Repeat password: "):
-        raise SystemExit("Password length or confirmation is invalid")
-    with SessionLocal() as db, transaction(db):
-        user = user_repository.find_by_email(db, args.email)
-        if user is None:
-            raise SystemExit("User not found; run seed or register the user first")
-        user.password_hash = hash_password(password)
-        user_repository.save(db, user)
-        session_repository.revoke_user(db, user.id)
-    print("Password updated; existing sessions revoked.")
+    if args.command == "link-keycloak":
+        if not args.subject or len(args.subject) > 255:
+            raise SystemExit("Provide the exact Keycloak subject ID")
+        with SessionLocal() as db, transaction(db):
+            user = user_repository.find_by_email(db, args.email)
+            if user is None:
+                raise SystemExit("Local user not found")
+            linked = user_repository.find_by_keycloak(db, args.issuer, args.subject)
+            if linked is not None and linked.id != user.id:
+                raise SystemExit("This issuer/subject is linked to another local user")
+            if user.keycloak_id and (
+                user.keycloak_id != args.subject or user.keycloak_issuer != args.issuer
+            ):
+                raise SystemExit("User already has a different Keycloak identity")
+            user.keycloak_id = args.subject
+            user.keycloak_issuer = args.issuer
+            user_repository.save(db, user)
+            session_repository.revoke_user(db, user.id)
+        print("Keycloak identity linked; local user ID and attempt history preserved.")
+        return
 
 
 if __name__ == "__main__":

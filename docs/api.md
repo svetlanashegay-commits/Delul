@@ -1,82 +1,31 @@
-# API Delul
+# API и матрица прав
 
-База `/api`, JSON, UUID. Страница прохождения: `/test`. Swagger: `/api/docs`.
+Все защищённые маршруты требуют Bearer access token Keycloak. Без токена или при неверной подписи/iss/aud/exp — 401; нет нужной роли — 403; сервер ключей недоступен — 503. Роли изменяются только в Keycloak. Регистрация и восстановление пароля выполняются на странице Keycloak.
 
-## Вход и роли
+| Метод | Путь | Кто | Ответ |
+|---|---|---|---|
+| GET | /api/health | Анонимный | 200, состояние БД; 503 при недоступной БД |
+| GET | /api/auth/me | student, teacher, admin | 200; профиль создаётся по issuer и sub |
+| GET | /api/users | admin | 200, список с limit/offset |
+| GET | /api/users/{user_id} | admin | 200 / 404 |
+| PATCH | /api/users/{user_id} | admin | 200, имя/группа; роль менять нельзя (400) |
+| DELETE | /api/users/{user_id} | admin | 204; себя удалить нельзя (400) |
+| GET | /api/quizzes | student, teacher, admin | 200; student — опубликованные, teacher — свои и опубликованные, admin — все |
+| POST | /api/quizzes | teacher, admin | 201 |
+| GET | /api/quizzes/{quiz_id} | student, teacher, admin | 200 / 404; студенту не выдаются правильные ответы |
+| PATCH | /api/quizzes/{quiz_id} | teacher-владелец, admin | 200; чужой — 403 |
+| DELETE | /api/quizzes/{quiz_id} | teacher-владелец, admin | 204; чужой — 403 |
+| POST | /api/quizzes/{quiz_id}/questions | teacher-владелец, admin | 201; опубликованный тест — 400 |
+| PATCH | /api/questions/{question_id} | teacher-владелец, admin | 200 |
+| DELETE | /api/questions/{question_id} | teacher-владелец, admin | 204 |
+| POST | /api/quizzes/{quiz_id}/publish | teacher-владелец, admin | 200; без вопросов — 400 |
+| POST | /api/quizzes/{quiz_id}/attempts | student | 201; accepted_rules=true; повторная попытка — 409 |
+| GET | /api/attempts/me | student | 200, собственные попытки |
+| GET | /api/attempts/{attempt_id} | student-владелец | 200; X-Attempt-Token |
+| PATCH | /api/attempts/{attempt_id}/answers | student-владелец | 200; attempt_token |
+| POST | /api/attempts/{attempt_id}/heartbeat | student-владелец | 200; attempt_token |
+| POST | /api/attempts/{attempt_id}/events | student-владелец | 200; attempt_token |
+| POST | /api/attempts/{attempt_id}/submit | student-владелец | 200; attempt_token |
+| GET | /api/quizzes/{quiz_id}/attempts | teacher-владелец, admin | 200, результаты и события |
 
-По умолчанию требуется cookie-сессия. POST `/auth/session` проверяет пароль и устанавливает HttpOnly cookie на 8 часов (SameSite=Strict; Secure вне local). Сервер хранит только хеш случайного токена. GET `/auth/me` возвращает профиль, POST `/auth/logout` отзывает сессию. Роль определяется из БД, а не из запроса.
-
-Публичная регистрация создаёт только student, с обязательными full_name и group_name. teacher/admin назначаются администратором; публичная попытка назначить эти роли — 422. Новые пароли — Argon2id; старые PBKDF2 обновляются после успешного login. Пароли и хеши в ответы не попадают. POST `/auth/login` сохранён как отдельная проверка пароля **без** создания сессии.
-
-ALLOW_DEMO_AUTH по умолчанию false. Прежний DEMO_USER_EMAIL работает только при явном включении ALLOW_DEMO_AUTH=true в local; начало и обслуживание защищённой попытки не используют эту подмену и всегда требуют настоящую сессию.
-
-## Эндпоинты
-
-| Метод | Путь после /api | Кто | Ответ |
-|-------|-----------------|-----|-------|
-| GET | `/health` | Все | 200 и статус БД; при недоступной БД — 503 |
-| POST | `/auth/register` | Все | 201; занятый email 409; неверные данные или привилегированная роль 422 |
-| POST | `/auth/login` | Все | 200 без токена/сессии; неверные данные 401 «Email немесе құпиясөз қате» |
-| POST | `/auth/session` | Все | 200, профиль и HttpOnly cookie; неверные данные 401 |
-| GET | `/auth/me` | Сессия | 200, профиль; нет или истекла сессия 401 |
-| POST | `/auth/logout` | Все | 204 без тела; отзыв текущей сессии |
-| GET | `/users` | admin | 200, список |
-| GET | `/users/{id}` | admin | 200 или 404 |
-| PATCH | `/users/{id}` | admin | 200; собственную роль менять нельзя 400; роль с историей 409 |
-| DELETE | `/users/{id}` | admin | 204; себя удалить нельзя 400; есть тесты/попытки 409 |
-| GET | `/quizzes` | student: опубликованные; teacher: свои и опубликованные; admin: все | 200, список |
-| POST | `/quizzes` | teacher, admin | 201, черновик и Location |
-| GET | `/quizzes/{id}` | По видимости списка | 200 или 404; студент получает метаданные без вопросов |
-| PATCH | `/quizzes/{id}` | Автор-teacher, admin | 200; чужой 403; не черновик или есть попытки 409 |
-| DELETE | `/quizzes/{id}` | Автор-teacher, admin | 204; чужой 403; не черновик или есть попытки 409 |
-| POST | `/quizzes/{id}/questions` | Автор-teacher, admin | 201; не черновик или неверный correct_index 400; чужой 403 |
-| PATCH | `/questions/{id}` | Автор-teacher, admin | 200; не черновик 400; чужой 403 |
-| DELETE | `/questions/{id}` | Автор-teacher, admin | 204; те же ограничения |
-| POST | `/quizzes/{id}/publish` | Автор-teacher, admin | 200; пустой/неполный или не черновик 400 |
-| POST | `/quizzes/{id}/attempts` | student с сессией | 201, начало единственной попытки; уже была попытка 409 |
-| GET | `/attempts/me` | student с сессией | 200, свои попытки всех состояний |
-| GET | `/attempts/{id}` | Владелец с сессией и ключом вкладки | 200; чужая 404; нет/неверный ключ 403 |
-| PATCH | `/attempts/{id}/answers` | Владелец с сессией и ключом | 200, сохранение выбранных ответов; неверная принадлежность или дубликаты 400 |
-| POST | `/attempts/{id}/heartbeat` | Владелец с сессией и ключом | 200, состояние попытки и серверное время |
-| POST | `/attempts/{id}/events` | Владелец с сессией и ключом | 200, предупреждение или blocked |
-| POST | `/attempts/{id}/submit` | Владелец с сессией и ключом | 200, итог; повторный запрос возвращает тот же итог, новую попытку не создаёт |
-| GET | `/quizzes/{id}/attempts` | Автор-teacher, admin | 200, имена/группы, статусы, deadline, события фокуса; чужой преподаватель 403 |
-
-Пути в таблице используются с префиксом /api. DELETE всегда без тела.
-
-## Тесты и вопросы
-
-Создание теста: title, category_id, time_limit_minutes (1–180, по умолчанию 30), необязательный questions. Вложенный вопрос: text, explanation, position от 1, options — объекты text/is_correct. В Create нет id, автора и статуса. PATCH принимает изменяемые поля, а переданный questions заменяет весь набор одной транзакцией. Пропущенные поля и null игнорируются; пустой объект — 422.
-
-Отдельное создание вопроса принимает text, options (минимум две строки), correct_index (индекс от 0), необязательные explanation и position. При замене options через PATCH нужен correct_index. Индекс вне массива — 400; занятая позиция — 409. Публикация требует вопросы, минимум два варианта и ровно один правильный ответ на вопрос. После публикации содержимое не меняется.
-
-## Защищённое прохождение
-
-Начало: `{"accepted_rules": true}`. Оно сразу расходует единственную попытку. Ответ содержит id, deadline_at, server_time, attempt_token и quiz с перемешанными вопросами и вариантами. is_correct и explanation студенту не выдаются. Ключ возвращается **только при начале**; затем хранится в sessionStorage исходной вкладки, на сервере — только хеш.
-
-Чтение: заголовок `X-Attempt-Token`. Для сохранения и команд ключ передаётся в JSON-поле attempt_token; в URL он не помещается.
-
-Сохранение:
-
-```json
-{
-  "attempt_token": "ключ исходной вкладки",
-  "answers": [{"question_id": "UUID вопроса", "answer_option_id": "UUID варианта или null"}]
-}
-```
-
-Список может содержать только изменённые ответы. Каждый вопрос встречается не более одного раза; вариант принадлежит этому вопросу. NULL — пропуск. Завершение и heartbeat принимают только attempt_token. Событие ухода дополнительно принимает уникальный event_id (UUID) и kind: hidden, blur, fullscreen_exit или pagehide. Повтор одного event_id не увеличивает счётчик.
-
-Первый уход — предупреждение, второй — blocked. Heartbeat нужен каждые 5 секунд; отсутствие более 45 секунд закрывает попытку. Deadline проверяется сервером и не продлевается heartbeat или перезагрузкой. По окончании времени — expired с результатом сохранённых ответов. После submitted/blocked/expired запись ответов не выполняется, новые вопросы не выдаются, новое начало невозможно. Команды возвращают актуальное состояние с 200, поэтому клиент обязан проверять status. Баллы для blocked студенту не показываются.
-
-Сохранение итогового статуса и единственного результата выполняется транзакционно. За верный ответ 1 балл; за ошибку/пропуск 0. Старый одношаговый POST с answers больше не поддерживается (422) и не обходит начало попытки.
-
-Списки users/quizzes/attempts/me: items, total, limit, offset, limit по умолчанию 20 (1–100), offset от 0. У quizzes есть фильтр category_id. Список контроля попыток преподавателя относится только к выбранному тесту.
-
-## Ошибки и слои
-
-401 — сессии нет/неверна; 403 — запрещённая роль, чужое изменение или неверный ключ; 404 — ресурс отсутствует/чужая попытка; 409 — повторное начало/конфликт; 422 — структура запроса; 503 — БД недоступна. Формат: `{"detail": "сообщение"}`, для валидации detail — массив без входного пароля/тела запроса.
-
-Сервисы выбрасывают доменные ошибки, main.py переводит их в HTTP. SQL остаётся в репозиториях. Статические файлы интерфейса не зависят от CDN, не кэшируются; CSP и frame-ancestors ограничивают внедрение скриптов и встраивание страницы.
-
-Настройка и ограничения описаны в [test-protection.md](test-protection.md). Перед использованием применить alembic upgrade head и seed; пароль преподавателя/admin задаётся локальной командой manage.py set-password EMAIL, без пароля в аргументах. При дубликатах старых попыток миграция 0003 останавливается до изменения данных.
+Связь данных: users → quizzes → questions → answer_options; users и quizzes → attempts → attempt_answers/results/attempt_events. categories группирует quizzes. Старые auth_sessions не используются для авторизации; сохранены в истории БД без активных cookie endpoints. Все таблицы описаны в er-diagram.md.

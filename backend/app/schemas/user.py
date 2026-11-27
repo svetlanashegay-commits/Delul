@@ -4,43 +4,10 @@ from uuid import UUID
 from pydantic import (
     BaseModel,
     ConfigDict,
-    EmailStr,
-    Field,
-    SecretStr,
-    field_validator,
     model_validator,
 )
 
 from app.schemas.quiz import InputModel, TextValue
-
-
-class Register(InputModel):
-    email: EmailStr
-    full_name: TextValue
-    password: SecretStr = Field(min_length=8, max_length=128)
-    role: Literal["student"] = "student"
-    group_name: TextValue | None = None
-
-    @field_validator("email")
-    @classmethod
-    def normalize_email(cls, value):
-        return value.lower()
-
-    @model_validator(mode="after")
-    def require_student_group(self):
-        if self.role == "student" and not self.group_name:
-            raise ValueError("Student group_name is required")
-        return self
-
-
-class Login(InputModel):
-    email: EmailStr
-    password: SecretStr = Field(min_length=1, max_length=128)
-
-    @field_validator("email")
-    @classmethod
-    def normalize_email(cls, value):
-        return value.lower()
 
 
 class UserPatch(InputModel):
@@ -70,7 +37,3 @@ class UserPage(BaseModel):
     total: int
     limit: int
     offset: int
-
-
-class LoginRead(BaseModel):
-    message: str

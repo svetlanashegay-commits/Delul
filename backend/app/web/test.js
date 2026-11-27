@@ -8,10 +8,10 @@ function screen(name) { sections.forEach(id => $(id).hidden = id !== name); }
 function notice(text = "") { $("notice").textContent = text; }
 async function api(path, options = {}) {
   const response = await fetch("/api" + path, {credentials: "same-origin", ...options,
-    headers: {"Content-Type": "application/json", ...(options.headers || {})}});
+    headers: {"Content-Type": "application/json", ...(await oidcHeaders()), ...(options.headers || {})}});
   if (response.status === 204) return null;
   const body = await response.json();
-  if (!response.ok) throw new Error(typeof body.detail === "string" ? body.detail : "Проверьте введённые данные.");
+  if (!response.ok) throw new Error(typeof body.detail === "string" ? body.detail : "РџСЂРѕРІРµСЂСЊС‚Рµ РІРІРµРґС‘РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ.");
   return body;
 }
 const post = (path, data, options = {}) => api(path, {method: "POST", body: JSON.stringify(data), ...options});
@@ -28,8 +28,8 @@ function apply(data) {
 function renderQuestion() {
   if (!quiz || !active || active.status !== "in_progress") return;
   const q = quiz.questions[index];
-  $("progress").textContent = `Вопрос ${index + 1} из ${quiz.questions.length} · предупреждений ${active.focus_count} из 2`;
-  $("question-text").textContent = q.text; $("choices").replaceChildren(element("legend", "Выберите ответ"));
+  $("progress").textContent = `Р’РѕРїСЂРѕСЃ ${index + 1} РёР· ${quiz.questions.length} В· РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёР№ ${active.focus_count} РёР· 2`;
+  $("question-text").textContent = q.text; $("choices").replaceChildren(element("legend", "Р’С‹Р±РµСЂРёС‚Рµ РѕС‚РІРµС‚"));
   for (const option of q.options) {
     const label = element("label", "", "option"), radio = element("input");
     radio.type = "radio"; radio.name = "answer"; radio.value = option.id;
@@ -38,7 +38,7 @@ function renderQuestion() {
     label.append(radio, element("span", option.text)); $("choices").append(label);
   }
   $("previous").disabled = index === 0; $("next").disabled = index === quiz.questions.length - 1;
-  $("save-status").textContent = pending.size ? "Сохранение ответа…" : "Ответы сохранены на сервере";
+  $("save-status").textContent = pending.size ? "РЎРѕС…СЂР°РЅРµРЅРёРµ РѕС‚РІРµС‚Р°вЂ¦" : "РћС‚РІРµС‚С‹ СЃРѕС…СЂР°РЅРµРЅС‹ РЅР° СЃРµСЂРІРµСЂРµ";
 }
 async function flushAnswers() {
   if (saving || !pending.size || !active || active.status !== "in_progress" || away) return;
@@ -48,7 +48,7 @@ async function flushAnswers() {
       answers: [...batch].map(([question_id, answer_option_id]) => ({question_id, answer_option_id}))})});
     for (const [key, value] of batch) {answers.set(key, value); if (pending.get(key) === value) pending.delete(key);}
     apply(data); notice();
-  } catch (error) {notice("Ответ пока не сохранён: " + error.message);} finally {saving = false;}
+  } catch (error) {notice("РћС‚РІРµС‚ РїРѕРєР° РЅРµ СЃРѕС…СЂР°РЅС‘РЅ: " + error.message);} finally {saving = false;}
   renderQuestion();
 }
 function tick() {
@@ -60,21 +60,21 @@ function tick() {
 function closeAttempt(data) {
   active = data; away = false; pending.clear(); quiz = null; sessionStorage.removeItem("delul_attempt");
   sessionStorage.removeItem("delul_focus_event"); screen("result");
-  const titles = {submitted: "Тест завершён", expired: "Время истекло", blocked: "Доступ к попытке закрыт"};
-  const reasons = {focus_lost: "Зарегистрирован повторный уход из вкладки или полного экрана.", connection_lost: "Не было связи с сервером более 45 секунд."};
-  $("result-title").textContent = titles[data.status] || "Попытка недоступна";
-  $("result-text").textContent = data.status === "blocked" ? (reasons[data.blocked_reason] || "Попытка заблокирована.") : `Сохранённый результат: ${data.score ?? 0} из ${data.max_score ?? 0}.`;
+  const titles = {submitted: "РўРµСЃС‚ Р·Р°РІРµСЂС€С‘РЅ", expired: "Р’СЂРµРјСЏ РёСЃС‚РµРєР»Рѕ", blocked: "Р”РѕСЃС‚СѓРї Рє РїРѕРїС‹С‚РєРµ Р·Р°РєСЂС‹С‚"};
+  const reasons = {focus_lost: "Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ РїРѕРІС‚РѕСЂРЅС‹Р№ СѓС…РѕРґ РёР· РІРєР»Р°РґРєРё РёР»Рё РїРѕР»РЅРѕРіРѕ СЌРєСЂР°РЅР°.", connection_lost: "РќРµ Р±С‹Р»Рѕ СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј Р±РѕР»РµРµ 45 СЃРµРєСѓРЅРґ."};
+  $("result-title").textContent = titles[data.status] || "РџРѕРїС‹С‚РєР° РЅРµРґРѕСЃС‚СѓРїРЅР°";
+  $("result-text").textContent = data.status === "blocked" ? (reasons[data.blocked_reason] || "РџРѕРїС‹С‚РєР° Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅР°.") : `РЎРѕС…СЂР°РЅС‘РЅРЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚: ${data.score ?? 0} РёР· ${data.max_score ?? 0}.`;
   $("question-text").textContent = ""; $("choices").replaceChildren();
   if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
 }
 async function endAttempt(ask = true) {
   if (!active || active.status !== "in_progress" || saving || ending) return;
   if (ask && !finishArmed) {
-    finishArmed = true; $("finish-test").textContent = "Нажмите ещё раз, чтобы завершить";
-    setTimeout(() => {finishArmed = false; $("finish-test").textContent = "Завершить тест";}, 6000);
+    finishArmed = true; $("finish-test").textContent = "РќР°Р¶РјРёС‚Рµ РµС‰С‘ СЂР°Р·, С‡С‚РѕР±С‹ Р·Р°РІРµСЂС€РёС‚СЊ";
+    setTimeout(() => {finishArmed = false; $("finish-test").textContent = "Р—Р°РІРµСЂС€РёС‚СЊ С‚РµСЃС‚";}, 6000);
     return;
   }
-  await flushAnswers(); if (pending.size) {notice("Сначала дождитесь сохранения ответов."); return;}
+  await flushAnswers(); if (pending.size) {notice("РЎРЅР°С‡Р°Р»Р° РґРѕР¶РґРёС‚РµСЃСЊ СЃРѕС…СЂР°РЅРµРЅРёСЏ РѕС‚РІРµС‚РѕРІ."); return;}
   ending = true;
   try {apply(await post(`/attempts/${active.id}/submit`, {attempt_token: accessKey}));} catch (error) {notice(error.message);} finally {ending = false;}
 }
@@ -84,7 +84,7 @@ function loseFocus(kind) {
   const payload = {attempt_token: accessKey, event_id: crypto.randomUUID(), kind};
   sessionStorage.setItem("delul_focus_event", JSON.stringify(payload));
   if (kind === "pagehide") {
-    navigator.sendBeacon(`/api/attempts/${active.id}/events`, new Blob([JSON.stringify(payload)], {type: "application/json"}));
+    post(`/attempts/${active.id}/events`, payload, {keepalive: true}).catch(() => {});
   } else post(`/attempts/${active.id}/events`, payload, {keepalive: true}).then(data => {
     sessionStorage.removeItem("delul_focus_event"); apply(data);
   }).catch(() => {});
@@ -104,18 +104,18 @@ async function returnToExam() {
 async function listTests() {
   notice(); active = null; screen("catalog"); $("quiz-list").replaceChildren();
   const [page, attempts] = await Promise.all([api("/quizzes?limit=100"), api("/attempts/me?limit=100")]);
-  if (!page.items.length) $("quiz-list").append(element("p", "Опубликованных тестов пока нет."));
+  if (!page.items.length) $("quiz-list").append(element("p", "РћРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹С… С‚РµСЃС‚РѕРІ РїРѕРєР° РЅРµС‚."));
   for (const item of page.items) {
     const card = element("article", "", "card"), previous = attempts.items.find(a => a.quiz_id === item.id);
-    card.append(element("h2", item.title), element("p", `${item.time_limit_minutes} минут · одна попытка`));
-    if (previous) {card.append(element("p", `Попытка уже начата. Статус: ${previous.status}.`));
+    card.append(element("h2", item.title), element("p", `${item.time_limit_minutes} РјРёРЅСѓС‚ В· РѕРґРЅР° РїРѕРїС‹С‚РєР°`));
+    if (previous) {card.append(element("p", `РџРѕРїС‹С‚РєР° СѓР¶Рµ РЅР°С‡Р°С‚Р°. РЎС‚Р°С‚СѓСЃ: ${previous.status}.`));
       const saved = JSON.parse(sessionStorage.getItem("delul_attempt") || "null");
       if (previous.status === "in_progress" && saved && saved.id === previous.id) {
-        const button = element("button", "Продолжить в этой вкладке"); button.onclick = () => resume(saved); card.append(button);
+        const button = element("button", "РџСЂРѕРґРѕР»Р¶РёС‚СЊ РІ СЌС‚РѕР№ РІРєР»Р°РґРєРµ"); button.onclick = () => resume(saved); card.append(button);
       }
     } else {
-      const button = element("button", "Прочитать правила"); button.onclick = () => {
-        chosen = item; $("rules-title").textContent = item.title; $("duration").textContent = `Время: ${item.time_limit_minutes} минут.`;
+      const button = element("button", "РџСЂРѕС‡РёС‚Р°С‚СЊ РїСЂР°РІРёР»Р°"); button.onclick = () => {
+        chosen = item; $("rules-title").textContent = item.title; $("duration").textContent = `Р’СЂРµРјСЏ: ${item.time_limit_minutes} РјРёРЅСѓС‚.`;
         $("accept-rules").checked = false; $("start-test").disabled = true; screen("rules");
       }; card.append(button);
     } $("quiz-list").append(card);
@@ -128,16 +128,11 @@ async function resume(saved) {
 }
 async function loadAccount() {
   const user = await api("/auth/me"); $("account").textContent = user.full_name; $("logout").hidden = false;
-  if (user.role !== "student") {screen("catalog"); $("quiz-list").replaceChildren(element("p", "Эта страница предназначена для студентов. Управление тестами и просмотр попыток доступны через Swagger /api/docs.")); return;}
+  if (user.role !== "student") {screen("catalog"); $("quiz-list").replaceChildren(element("p", "Р­С‚Р° СЃС‚СЂР°РЅРёС†Р° РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅР° РґР»СЏ СЃС‚СѓРґРµРЅС‚РѕРІ. РЈРїСЂР°РІР»РµРЅРёРµ С‚РµСЃС‚Р°РјРё Рё РїСЂРѕСЃРјРѕС‚СЂ РїРѕРїС‹С‚РѕРє РґРѕСЃС‚СѓРїРЅС‹ С‡РµСЂРµР· Swagger /api/docs.")); return;}
   await listTests();
 }
-$("login-form").onsubmit = async event => {event.preventDefault(); try {
-  await post("/auth/session", {email: $("email").value, password: $("password").value}); $("password").value = ""; await loadAccount();
-} catch (error) {notice(error.message);}};
-$("register-form").onsubmit = async event => {event.preventDefault(); try {
-  const values = Object.fromEntries(new FormData(event.target)); await post("/auth/register", values); event.target.reset(); notice("Аккаунт создан. Теперь войдите.");
-} catch (error) {notice(error.message);}};
-$("logout").onclick = async () => {if (active?.status === "in_progress") {notice("Сначала завершите попытку."); return;} await post("/auth/logout", {}); $("logout").hidden = true; $("account").textContent = ""; screen("auth");};
+$("keycloak-login").onclick = () => oidcLogin().catch(error => notice(error.message));
+$("logout").onclick = () => {if (active?.status === "in_progress") {notice("Сначала завершите попытку."); return;} oidcLogout();};
 $("accept-rules").onchange = () => $("start-test").disabled = !$("accept-rules").checked;
 $("cancel-start").onclick = () => screen("catalog");
 $("start-test").onclick = async () => {
@@ -159,5 +154,5 @@ window.addEventListener("beforeunload", event => {if (active?.status === "in_pro
 for (const type of ["copy", "cut", "contextmenu", "dragstart"]) document.addEventListener(type, event => {if (active?.status === "in_progress") event.preventDefault();});
 document.addEventListener("keydown", event => {if (active?.status === "in_progress" && (event.ctrlKey || event.metaKey) && ["c", "x", "a", "p", "s"].includes(event.key.toLowerCase())) event.preventDefault();});
 setInterval(tick, 1000);
-setInterval(async () => {if (active?.status !== "in_progress" || away || saving) return; try {apply(await post(`/attempts/${active.id}/heartbeat`, {attempt_token: accessKey})); flushAnswers();} catch {notice("Нет связи с сервером. Если она не восстановится за 45 секунд, попытка закроется.");}}, 5000);
-loadAccount().catch(() => screen("auth"));
+setInterval(async () => {if (active?.status !== "in_progress" || away || saving) return; try {apply(await post(`/attempts/${active.id}/heartbeat`, {attempt_token: accessKey})); flushAnswers();} catch {notice("РќРµС‚ СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј. Р•СЃР»Рё РѕРЅР° РЅРµ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЃСЏ Р·Р° 45 СЃРµРєСѓРЅРґ, РїРѕРїС‹С‚РєР° Р·Р°РєСЂРѕРµС‚СЃСЏ.");}}, 5000);
+oidcReady().then(loadAccount).catch(error => {screen("auth"); notice(error.message);});

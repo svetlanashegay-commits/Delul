@@ -1,5 +1,7 @@
 """Local demo data. Run from backend: python seed.py (after migrations)."""
 
+from uuid import NAMESPACE_URL, uuid5
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -19,7 +21,9 @@ def seed(db: Session) -> None:
         ]:
             user = db.scalar(select(User).where(User.email == email))
             if user is None:
-                db.add(User(email=email, full_name=name, role=role, group_name=group))
+                db.add(User(email=email, full_name=name, role=role, group_name=group,
+                            keycloak_id=str(uuid5(NAMESPACE_URL, "delul/keycloak/" + role)),
+                            keycloak_issuer=settings.keycloak_issuer))
             elif user.role != role:
                 raise ValueError(f"Existing demo account has a different role: {email}")
         db.flush()

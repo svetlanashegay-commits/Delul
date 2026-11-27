@@ -10,6 +10,12 @@ def find_by_email(db: Session, email: str) -> User | None:
     return db.scalar(select(User).where(func.lower(User.email) == email.lower()))
 
 
+def find_by_keycloak(db: Session, issuer: str, subject: str) -> User | None:
+    return db.scalar(
+        select(User).where(User.keycloak_issuer == issuer, User.keycloak_id == subject)
+    )
+
+
 def get(db: Session, user_id: UUID) -> User | None:
     return db.get(User, user_id)
 
@@ -36,13 +42,8 @@ def delete(db: Session, user: User) -> None:
 
 
 def has_quizzes(db: Session, user_id: UUID) -> bool:
-    return (
-        db.scalar(select(Quiz.id).where(Quiz.author_id == user_id).limit(1)) is not None
-    )
+    return db.scalar(select(Quiz.id).where(Quiz.author_id == user_id).limit(1)) is not None
 
 
 def has_attempts(db: Session, user_id: UUID) -> bool:
-    return (
-        db.scalar(select(Attempt.id).where(Attempt.user_id == user_id).limit(1))
-        is not None
-    )
+    return db.scalar(select(Attempt.id).where(Attempt.user_id == user_id).limit(1)) is not None

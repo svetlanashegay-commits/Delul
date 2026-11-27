@@ -1,0 +1,17 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    container_name: delul-keycloak
+    command: ["start-dev", "--import-realm"]
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: "${KC_BOOTSTRAP_ADMIN_USERNAME:-operator}"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "${KC_BOOTSTRAP_ADMIN_PASSWORD:?Run python keycloak/start.py first}"
+      KC_HOSTNAME: "http://localhost:8080"
+    volumes:
+      - delul-keycloak-data:/opt/keycloak/data
+      - ./realm-delul.json:/opt/keycloak/data/import/delul-realm.json:ro
+    mem_limit: 1g
+volumes:
+  delul-keycloak-data:

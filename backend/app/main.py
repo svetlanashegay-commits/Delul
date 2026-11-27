@@ -29,6 +29,12 @@ app = FastAPI(
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
     redoc_url=None,
+    swagger_ui_oauth2_redirect_url="/api/docs/oauth2-redirect",
+    swagger_ui_init_oauth={
+        "clientId": settings.keycloak_client_id,
+        "usePkceWithAuthorizationCodeGrant": True,
+        "scopes": "openid profile email",
+    },
 )
 app.include_router(health_router)
 app.include_router(quizzes_router)
@@ -54,12 +60,10 @@ async def security_headers(request: Request, call_next):
         response.headers["Cache-Control"] = "no-store"
     if request.url.path.startswith("/test"):
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; "
+            f"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' {settings.keycloak_issuer.split('/realms/')[0]}; "
             "img-src 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'"
         )
-        response.headers["Permissions-Policy"] = (
-            "camera=(), microphone=(), display-capture=()"
-        )
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), display-capture=()"
     return response
 
 
@@ -78,7 +82,12 @@ ERROR_STATUS = {
 async def domain_error(request: Request, exc: DomainError):
     status = ERROR_STATUS.get(type(exc), 500)
     message = str(exc) if status != 500 else "Internal server error"
-    return JSONResponse(status_code=status, content={"detail": message})
+    headers = (
+        {"WWW-Authenticate": "Bearer"}
+        if status == 401 and settings.auth_mode == "keycloak"
+        else None
+    )
+    return JSONResponse(status_code=status, content={"detail": message}, headers=headers)
 
 
 @app.exception_handler(RequestValidationError)

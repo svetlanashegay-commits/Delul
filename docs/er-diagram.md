@@ -1,3 +1,5 @@
+> Урок 10: авторизация только Keycloak; users.password_hash удалён миграцией 0005. Разделы о прежних cookie-сессиях ниже описывают историю проекта. Актуальные маршруты и права: api.md.
+
 # Модель данных Delul
 
 Актуальна для учебного API модулей 1–6 из api.md. Десять таблиц, во всех UUID id — первичный ключ. Схему создают начальная ревизия и последующие миграции 0002/0003.
@@ -6,7 +8,7 @@
 
 | Таблица | Поля | Ограничения |
 |---------|------|-------------|
-| users | id, email, full_name, role, group_name, password_hash | email уникален; role: teacher/student/admin; имя и email непустые; группе student нужна непустая group_name |
+| users | id, email, full_name, role, group_name, password_hash, keycloak_id, keycloak_issuer | email уникален; role: teacher/student/admin; имя и email непустые; группе student нужна непустая group_name |
 | categories | id, name, description, created_at | name уникален, created_at задаётся БД |
 | quizzes | id, title, author_id, category_id, status, results_released_at, time_limit_minutes | автор и категория обязательны; статусы draft/published/closed; results_released_at допустим только для closed |
 | questions | id, quiz_id, text, explanation, position | пара quiz_id/position уникальна |
@@ -17,7 +19,7 @@
 | auth_sessions | id, user_id, token_hash, expires_at | токен уникален; хранится только хеш; user_id FK ON DELETE CASCADE |
 | attempt_events | id, attempt_id, event_id, kind, occurred_at | пара attempt_id/event_id уникальна; FK ON DELETE RESTRICT |
 
-password_hash — необязательный хеш Argon2id (старые PBKDF2-хеши поддерживаются до успешного login), добавленный по новому заданию о регистрации. Открытых паролей и токенов нет. У демопользователей seed хеш NULL, поэтому их нельзя использовать для проверки login. Это изменение заменяет прежний план входа через Keycloak; Keycloak сейчас не используется.
+password_hash — необязательный хеш Argon2id (старые PBKDF2-хеши поддерживаются до успешного login), добавленный по новому заданию о регистрации. Открытых паролей и токенов нет. У демопользователей seed хеш NULL, поэтому их нельзя использовать для проверки login. Локальный хеш используется в AUTH_MODE=local; для AUTH_MODE=keycloak предусмотрена отдельная проверенная идентичность issuer/sub.
 
 ## Связи
 
@@ -57,6 +59,8 @@ erDiagram
         string role
         string group_name
         string password_hash
+        string keycloak_id
+        string keycloak_issuer
     }
     categories {
         uuid id PK
@@ -139,3 +143,5 @@ erDiagram
 Начальная миграция предназначена для пустой БД; существующую вручную созданную схему нужно предварительно сопоставить. Тесты создают отдельную временную БД и не используют рабочие данные.
 
 Одна попытка на аккаунт и тест закреплена ограничением UNIQUE. Ключ исходной вкладки хранится только как хеш, а порядок вопросов и вариантов — в JSON. Подробные состояния и правила: [test-protection.md](test-protection.md). К пользовательским профилям добавлены cookie-сессии: их FK удаляется каскадно при удалении пользователя; история попыток и событий ограничена RESTRICT.
+
+Миграция 0004 добавляет nullable keycloak_id/keycloak_issuer: оба значения NULL для локального профиля либо оба заполнены; пара уникальна. Связь по email не выполняется автоматически, ID локального пользователя и история попыток сохраняются. Пароль Keycloak и его токены в users не записываются. Локальный password_hash остаётся для совместимого local-режима.

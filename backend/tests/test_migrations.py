@@ -37,7 +37,7 @@ def test_initial_migration_roundtrip_and_postgres_sql(tmp_path):
         "auth_sessions",
         "attempt_events",
     }
-    assert "password_hash" in {
+    assert "password_hash" not in {
         column["name"] for column in inspector.get_columns("users")
     }
     assert "position" in {
@@ -88,12 +88,12 @@ def test_password_revision_repairs_legacy_schema_without_losing_users(tmp_path):
         )
     run("head")
     with engine.connect() as connection:
-        assert "password_hash" in {
+        assert "password_hash" not in {
             c["name"] for c in inspect(connection).get_columns("users")
         }
         assert connection.exec_driver_sql("SELECT COUNT(*) FROM users").scalar() == 1
         assert (
-            connection.exec_driver_sql("SELECT password_hash FROM users").scalar()
+            connection.exec_driver_sql("SELECT keycloak_id FROM users").scalar()
             is None
         )
     engine.dispose()
